@@ -109,12 +109,31 @@ async function loadTournaments() {
 // ---------- الكروت ----------
 
 function createMatchCard(match) {
+  const API_DOMAIN = "https://www.yanb8.com"; // عدل لو فيه دومين مختلف للصور
+  const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة')
+    ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>`
+    : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
+
+  let statusClass = 'status-not-started';
+  if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
+  else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
+  else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
+
   const div = document.createElement("div");
-  div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow";
   div.innerHTML = `
-    <div class="flex justify-between items-center">
-      <span>${match.homeTeam} vs ${match.awayTeam}</span>
-      <span class="text-sm text-gray-500">${match.time}</span>
+    <div class="match-body" data-match-id="${match['Match-id']}">
+      <div class="team">
+        <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="team-logo">
+        <h3 class="team-name">${match['Team-Left']['Name']}</h3>
+      </div>
+      <div class="match-details-preview">
+        ${detailsContent}
+        <span class="match-status ${statusClass}">${match['Match-Status']}</span>
+      </div>
+      <div class="team">
+        <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="team-logo">
+        <h3 class="team-name">${match['Team-Right']['Name']}</h3>
+      </div>
     </div>
   `;
   return div;
@@ -135,35 +154,50 @@ function createTransferCard(t) {
   `;
   return div;
 }
-
-function createNewsCard(article) {
+function createNewsCard(item, index = 0) {
   const div = document.createElement("div");
-  div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow";
   div.innerHTML = `
-    <h3 class="font-semibold">${article.title}</h3>
-    <p class="text-sm text-gray-500">${article.date}</p>
+    <div class="news-card" data-news-index="${index}">
+      <img src="${item.image}" alt="${item.title}" class="news-image">
+      <div class="news-content">
+        <h2 class="news-title">${item.title}</h2>
+        <p class="news-summary">${item.sub_link}</p>
+        <p class="news-time">${item.time}</p>
+      </div>
+    </div>
   `;
   return div;
 }
 
-function createVideoCard(video) {
+function createVideoCard(item) {
   const div = document.createElement("div");
-  div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow";
   div.innerHTML = `
-    <video controls src="${video.url}" class="w-full rounded"></video>
-    <p class="mt-2">${video.title}</p>
+    <div class="video-card" data-m3u8-url="${item.m3u8_url}">
+      <div class="video-thumbnail-wrapper">
+        <img src="${item.imageurl}" alt="${item.title}" class="video-thumbnail">
+        <div class="play-icon"></div>
+      </div>
+      <div class="video-content">
+        <h2 class="video-title">${item.title}</h2>
+        <p class="video-category">${item.category}</p>
+      </div>
+    </div>
   `;
   return div;
 }
 
-function createTournamentCard(t) {
+
+function createTournamentCard(tour, index = 0) {
   const div = document.createElement("div");
-  div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow text-center";
   div.innerHTML = `
-    <h3 class="font-bold">${t.name}</h3>
+    <div class="tournament-card" data-index="${index}">
+      <img src="${tour.image}" alt="${tour.title}" class="tournament-card-image">
+      <h3 class="tournament-card-title">${tour.title}</h3>
+    </div>
   `;
   return div;
 }
+
 
 function createMoreCard(text, viewId) {
   const a = document.createElement("a");

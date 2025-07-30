@@ -26,7 +26,7 @@ async function loadMatches() {
 // 2. تحميل 3 انتقالات
 async function loadTransfers() {
   const container = document.getElementById("home-transfers-container");
-  const res = await fetch("hhttps://ko.best-goal.live/transation.php");
+  const res = await fetch("https://ko.best-goal.live/transation.php");
   const data = await res.json();
 
   const transfers = data.slice(0, 3);

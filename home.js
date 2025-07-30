@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
 // 1. تحميل 3 مباريات رئيسية فقط
 async function loadMatches() {
   const container = document.getElementById("home-matches-container");
-  const res = await fetch("https://your-api.com/matches/today");
+  const res = await fetch("https://yanb8.bassamnetflix2.workers.dev/https://www.yanb8.com/api/matches/?date=today&time=3:00");
   const data = await res.json();
 
   const matches = data.slice(0, 3); // أول 3 مباريات
@@ -26,7 +26,7 @@ async function loadMatches() {
 // 2. تحميل 3 انتقالات
 async function loadTransfers() {
   const container = document.getElementById("home-transfers-container");
-  const res = await fetch("https://your-api.com/transfers");
+  const res = await fetch("hhttps://ko.best-goal.live/transation.php");
   const data = await res.json();
 
   const transfers = data.slice(0, 3);
@@ -42,7 +42,7 @@ async function loadTransfers() {
 // 3. تحميل 3 أخبار
 async function loadNews() {
   const container = document.getElementById("home-news-container");
-  const res = await fetch("https://your-api.com/news");
+  const res = await fetch("https://ko.best-goal.live/news.php");
   const data = await res.json();
 
   const news = data.slice(0, 3);
@@ -58,7 +58,7 @@ async function loadNews() {
 // 4. تحميل 3 فيديوهات
 async function loadVideos() {
   const container = document.getElementById("home-videos-container");
-  const res = await fetch("https://your-api.com/videos");
+  const res = await fetch("https://ko.best-goal.live/videos.php");
   const data = await res.json();
 
   const videos = data.slice(0, 3);
@@ -74,7 +74,7 @@ async function loadVideos() {
 // 5. تحميل 3 بطولات
 async function loadTournaments() {
   const container = document.getElementById("home-tournaments-container");
-  const res = await fetch("https://your-api.com/tournaments");
+  const res = await fetch("https://ko.best-goal.live/get.php");
   const data = await res.json();
 
   const tournaments = data.slice(0, 3);

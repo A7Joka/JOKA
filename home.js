@@ -140,7 +140,7 @@ function createNewsCard(article) {
     const div = document.createElement("div");
     div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow";
     div.innerHTML = `
-  <div class="news-card" data-news-index="${index}"><img src="${article.image}" alt="${article.title}" class="news-image"><div class="news-content"><h2 class="news-title">${article.title}</h2><p class="news-summary">${article.sub_link}</p><p class="news-time">${article.time}</p></div></div>
+  <div class="news-card"><img src="${article.image}" alt="${article.title}" class="news-image"><div class="news-content"><h2 class="news-title">${article.title}</h2><p class="news-summary">${article.sub_link}</p><p class="news-time">${article.time}</p></div></div>
   `;
     return div;
 }

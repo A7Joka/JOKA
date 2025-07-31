@@ -150,7 +150,7 @@ function createMatchCard(match) {
       <span class="team-name">${match['Team-Left']['Name']}</span>
     </div>
     <div class="match-part part-center ${statusClass}">
-      ${detailsContent}
+      ${matchTimeOrResult}
       <span class="match-status">${match['Match-Status']}</span>
     </div>
     <div class="match-part part-name">
@@ -162,37 +162,6 @@ function createMatchCard(match) {
   </div>
   `;
   return div;
-}
-
-function renderMatchCard(match) {
-  const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة')
-    ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>`
-    : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
-
-  let statusClass = 'status-not-started';
-  if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
-  else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
-  else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
-
-  return `
-  <div class="match-body" data-match-id="${match['Match-id']}">
-    <div class="match-part part-logo">
-      <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
-    </div>
-    <div class="match-part part-name">
-      <span class="team-name">${match['Team-Left']['Name']}</span>
-    </div>
-    <div class="match-part part-center ${statusClass}">
-      ${detailsContent}
-      <span class="match-status">${match['Match-Status']}</span>
-    </div>
-    <div class="match-part part-name">
-      <span class="team-name">${match['Team-Right']['Name']}</span>
-    </div>
-    <div class="match-part part-logo">
-      <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="match-logo" />
-    </div>
-  </div>`;
 }
 
 

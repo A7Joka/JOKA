@@ -18,8 +18,12 @@ async function loadMatches() {
       const card = createMatchCard(match);
       container.appendChild(card);
     });
+const section = container.parentElement; // جايب السكشن الأب
+    const moreWrapper = document.createElement("div");
+    moreWrapper.className = "w-full flex justify-center mt-4";
+    moreWrapper.appendChild(createMoreCard("عرض المزيد", "matches-view")); 
+    section.appendChild(moreWrapper);
 
-    container.appendChild(createMoreCard("عرض المزيد", "matches-view"));
   } catch (err) {
     container.innerHTML = `<p class="text-red-500">فشل تحميل المباريات</p>`;
     console.error("Matches Error:", err);
@@ -41,7 +45,7 @@ async function loadTransfers() {
 const section = container.parentElement; // جايب السكشن الأب
     const moreWrapper = document.createElement("div");
     moreWrapper.className = "w-full flex justify-center mt-4";
-     container.appendChild(createMoreCard("عرض المزيد", "transfers-view"));
+     moreWrapper.appendChild(createMoreCard("عرض المزيد", "transfers-view"));
     section.appendChild(moreWrapper);
    
   } catch (err) {
@@ -88,7 +92,7 @@ async function loadVideos() {
 const section = container.parentElement; // جايب السكشن الأب
     const moreWrapper = document.createElement("div");
     moreWrapper.className = "w-full flex justify-center mt-4";
-    container.appendChild(createMoreCard("عرض المزيد", "videos-view"));
+    moreWrapper.appendChild(createMoreCard("عرض المزيد", "videos-view"));
     section.appendChild(moreWrapper);
 
   } catch (err) {
@@ -112,7 +116,7 @@ async function loadTournaments() {
 const section = container.parentElement; // جايب السكشن الأب
     const moreWrapper = document.createElement("div");
     moreWrapper.className = "w-full flex justify-center mt-4";
-    container.appendChild(createMoreCard("عرض المزيد", "tournaments-view")); 
+    moreWrapper.appendChild(createMoreCard("عرض المزيد", "tournaments-view")); 
     section.appendChild(moreWrapper);
 
   } catch (err) {
@@ -214,9 +218,6 @@ function createTournamentCard(tour, index = 0) {
 }
 
 function createMoreCard(text, viewId) {
-  const wrapper = document.createElement("div");
-  wrapper.className = "w-full flex justify-center mt-4"; // ✅ وسطي الزر
-
   const a = document.createElement("a");
   a.href = "#";
   a.dataset.view = viewId;
@@ -226,9 +227,7 @@ function createMoreCard(text, viewId) {
     e.preventDefault();
     switchView(viewId);
   });
-
-  wrapper.appendChild(a);
-  return wrapper;
+  return a;
 }
 
 

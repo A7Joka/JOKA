@@ -12,7 +12,7 @@ async function loadMatches() {
   try {
     const res = await fetch("https://yanb8.bassamnetflix2.workers.dev/https://www.yanb8.com/api/matches/?date=today&time=3:00");
     const json = await res.json();
-    const matches = json["STING-WEB-Matches"].slice(0, 3);
+    const matches = json["STING-WEB-Matches"].slice(0, 5);
 
     matches.forEach(match => {
       const card = createMatchCard(match);
@@ -32,7 +32,7 @@ async function loadTransfers() {
   try {
     const res = await fetch("https://ko.best-goal.live/transation.php");
     const json = await res.json();
-    const transfers = json.data.slice(0, 3);
+    const transfers = json.data.slice(0, 7);
 
     transfers.forEach(transfer => {
       const card = createTransferCard(transfer);
@@ -52,7 +52,7 @@ async function loadNews() {
   try {
     const res = await fetch("https://ko.best-goal.live/news.php");
     const data = await res.json();
-    const news = data.slice(0, 3);
+    const news = data.slice(0, 7);
 
     news.forEach(article => {
       const card = createNewsCard(article);
@@ -72,7 +72,7 @@ async function loadVideos() {
   try {
     const res = await fetch("https://ko.best-goal.live/videos.php");
     const data = await res.json();
-    const videos = data.slice(0, 3);
+    const videos = data.slice(0, 7);
 
     videos.forEach(video => {
       const card = createVideoCard(video);
@@ -92,7 +92,7 @@ async function loadTournaments() {
   try {
     const res = await fetch("https://ko.best-goal.live/get.php");
     const json = await res.json();
-    const tournaments = json.data.slice(0, 3);
+    const tournaments = json.data.slice(0, 7);
 
     tournaments.forEach(tournament => {
       const card = createTournamentCard(tournament);
@@ -203,7 +203,7 @@ function createMoreCard(text, viewId) {
   const a = document.createElement("a");
   a.href = "#";
   a.dataset.view = viewId;
-  a.className = "bg-gray-700 hover:bg-teal-700 transition text-center p-4 rounded-xl flex items-center justify-center text-teal-300 font-semibold";
+  a.className = "bg-gray-200 hover:bg-teal-700 transition text-center p-4 rounded-xl flex items-center justify-center text-teal-50 font-semibold";
   a.textContent = text;
   a.addEventListener("click", (e) => {
     e.preventDefault();

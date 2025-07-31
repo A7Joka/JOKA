@@ -140,7 +140,7 @@ function createMatchCard(match) {
 
   const div = document.createElement("div");
   div.innerHTML = `
-    <div class="match-body" data-match-id="${match['Match-id']}">
+    <div class="match-body bg-white dark:bg-gray-800 p-4 rounded-lg shadow text-center" data-match-id="${match['Match-id']}">
       <div class="team">
         <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="team-logo">
         <h3 class="team-name">${match['Team-Left']['Name']}</h3>

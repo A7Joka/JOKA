@@ -203,7 +203,7 @@ function createMoreCard(text, viewId) {
   const a = document.createElement("a");
   a.href = "#";
   a.dataset.view = viewId;
-  a.className = "bg-gray-200 hover:bg-teal-700 transition text-center p-4 rounded-xl flex items-center justify-center text-teal-50 font-semibold";
+  a.className = "btn btn-outline-info text-center flex items-center justify-center font-semibold";
   a.textContent = text;
   a.addEventListener("click", (e) => {
     e.preventDefault();

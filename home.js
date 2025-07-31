@@ -126,6 +126,44 @@ const section = container.parentElement; // جايب السكشن الأب
 }
 
 // ---------- الكروت ----------
+function createMatchCard(match) {
+  const API_DOMAIN = "https://www.yanb8.com";
+
+  const isNotStarted = match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة';
+  const statusClass = match['Match-Status'] === 'انتهت' ? 'status-finished'
+    : match['Match-Status'] === 'مؤجلة' ? 'status-postponed'
+    : match['Match-Status'] === 'لم تبدأ' ? 'status-not-started'
+    : 'status-live';
+
+  const matchTimeOrResult = isNotStarted
+    ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>`
+    : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
+
+  const div = document.createElement("div");
+  div.className = "match-card";
+  div.innerHTML = `
+  <div class="match-body" data-match-id="${match['Match-id']}">
+    <div class="match-part part-logo">
+      <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
+    </div>
+    <div class="match-part part-name">
+      <span class="team-name">${match['Team-Left']['Name']}</span>
+    </div>
+    <div class="match-part part-center ${statusClass}">
+      ${detailsContent}
+      <span class="match-status">${match['Match-Status']}</span>
+    </div>
+    <div class="match-part part-name">
+      <span class="team-name">${match['Team-Right']['Name']}</span>
+    </div>
+    <div class="match-part part-logo">
+      <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="match-logo" />
+    </div>
+  </div>
+  `;
+  return div;
+}
+
 function renderMatchCard(match) {
   const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة')
     ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>`

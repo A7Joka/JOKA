@@ -38,8 +38,12 @@ async function loadTransfers() {
       const card = createTransferCard(transfer);
       container.appendChild(card);
     });
-
-    container.appendChild(createMoreCard("عرض المزيد", "transfers-view"));
+const section = container.parentElement; // جايب السكشن الأب
+    const moreWrapper = document.createElement("div");
+    moreWrapper.className = "w-full flex justify-center mt-4";
+     container.appendChild(createMoreCard("عرض المزيد", "transfers-view"));
+    section.appendChild(moreWrapper);
+   
   } catch (err) {
     container.innerHTML = `<p class="text-red-500">فشل تحميل الانتقالات</p>`;
     console.error("Transfers Error:", err);
@@ -58,8 +62,11 @@ async function loadNews() {
       const card = createNewsCard(article);
       container.appendChild(card);
     });
-
-    container.appendChild(createMoreCard("عرض المزيد", "news-view"));
+const section = container.parentElement; // جايب السكشن الأب
+    const moreWrapper = document.createElement("div");
+    moreWrapper.className = "w-full flex justify-center mt-4";
+    moreWrapper.appendChild(createMoreCard("عرض المزيد", "news-view"));
+    section.appendChild(moreWrapper);
   } catch (err) {
     container.innerHTML = `<p class="text-red-500">فشل تحميل الأخبار</p>`;
     console.error("News Error:", err);
@@ -78,8 +85,12 @@ async function loadVideos() {
       const card = createVideoCard(video);
       container.appendChild(card);
     });
-
+const section = container.parentElement; // جايب السكشن الأب
+    const moreWrapper = document.createElement("div");
+    moreWrapper.className = "w-full flex justify-center mt-4";
     container.appendChild(createMoreCard("عرض المزيد", "videos-view"));
+    section.appendChild(moreWrapper);
+
   } catch (err) {
     container.innerHTML = `<p class="text-red-500">فشل تحميل الفيديوهات</p>`;
     console.error("Videos Error:", err);
@@ -98,8 +109,12 @@ async function loadTournaments() {
       const card = createTournamentCard(tournament);
       container.appendChild(card);
     });
+const section = container.parentElement; // جايب السكشن الأب
+    const moreWrapper = document.createElement("div");
+    moreWrapper.className = "w-full flex justify-center mt-4";
+    container.appendChild(createMoreCard("عرض المزيد", "tournaments-view")); 
+    section.appendChild(moreWrapper);
 
-    container.appendChild(createMoreCard("عرض المزيد", "tournaments-view"));
   } catch (err) {
     container.innerHTML = `<p class="text-red-500">فشل تحميل البطولات</p>`;
     console.error("Tournaments Error:", err);

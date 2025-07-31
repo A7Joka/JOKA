@@ -198,19 +198,24 @@ function createTournamentCard(tour, index = 0) {
   return div;
 }
 
-
 function createMoreCard(text, viewId) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "w-full flex justify-center mt-4"; // ✅ وسطي الزر
+
   const a = document.createElement("a");
   a.href = "#";
   a.dataset.view = viewId;
-  a.className = "btn btn-outline-info text-center flex items-center justify-center font-semibold";
+  a.className = "btn btn-outline-info font-semibold text-center";
   a.textContent = text;
   a.addEventListener("click", (e) => {
     e.preventDefault();
     switchView(viewId);
   });
-  return a;
+
+  wrapper.appendChild(a);
+  return wrapper;
 }
+
 
 // ---------- التنقل بين الـ views ----------
 

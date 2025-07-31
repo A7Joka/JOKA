@@ -132,28 +132,28 @@ function createMatchCard(match) {
 
   const isNotStarted = match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة';
   const statusClass = match['Match-Status'] === 'انتهت' ? 'status-finished'
-                    : match['Match-Status'] === 'مؤجلة' ? 'status-postponed'
-                    : match['Match-Status'] === 'لم تبدأ' ? 'status-not-started'
-                    : 'status-live';
+    : match['Match-Status'] === 'مؤجلة' ? 'status-postponed'
+    : match['Match-Status'] === 'لم تبدأ' ? 'status-not-started'
+    : 'status-live';
 
   const matchTimeOrResult = isNotStarted
-    ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>`
+    ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>`
     : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
 
   const div = document.createElement("div");
   div.className = "match-card";
   div.innerHTML = `
     <div class="match-body" data-match-id="${match['Match-id']}">
+      <div class="team-logo-container"><img src="${API_DOMAIN}${match['Team-Left']['Logo']}" class="team-logo" alt="${match['Team-Left']['Name']}"></div>
       <div class="team-name">${match['Team-Left']['Name']}</div>
-      <div><img src="${API_DOMAIN}${match['Team-Left']['Logo']}" class="team-logo" alt=""></div>
 
       <div class="match-details-preview">
         ${matchTimeOrResult}
         <span class="match-status ${statusClass}">${match['Match-Status']}</span>
       </div>
 
-      <div><img src="${API_DOMAIN}${match['Team-Right']['Logo']}" class="team-logo" alt=""></div>
       <div class="team-name">${match['Team-Right']['Name']}</div>
+      <div class="team-logo-container"><img src="${API_DOMAIN}${match['Team-Right']['Logo']}" class="team-logo" alt="${match['Team-Right']['Name']}"></div>
     </div>
   `;
   return div;

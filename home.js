@@ -128,35 +128,37 @@ const section = container.parentElement; // جايب السكشن الأب
 // ---------- الكروت ----------
 
 function createMatchCard(match) {
-  const API_DOMAIN = "https://www.yanb8.com"; // عدل لو فيه دومين مختلف للصور
-  const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة')
+  const API_DOMAIN = "https://www.yanb8.com";
+
+  const isNotStarted = match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة';
+  const statusClass = match['Match-Status'] === 'انتهت' ? 'status-finished'
+                    : match['Match-Status'] === 'مؤجلة' ? 'status-postponed'
+                    : match['Match-Status'] === 'لم تبدأ' ? 'status-not-started'
+                    : 'status-live';
+
+  const matchTimeOrResult = isNotStarted
     ? `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}</div>`
     : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
 
-  let statusClass = 'status-not-started';
-  if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
-  else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
-  else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
-
   const div = document.createElement("div");
+  div.className = "match-card";
   div.innerHTML = `
-    <div class="match-body bg-white dark:bg-gray-800 p-4 rounded-lg shadow text-center" data-match-id="${match['Match-id']}">
-      <div class="team">
-        <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="team-logo">
-        <h3 class="team-name">${match['Team-Left']['Name']}</h3>
-      </div>
+    <div class="match-body" data-match-id="${match['Match-id']}">
+      <div class="team-name">${match['Team-Left']['Name']}</div>
+      <div><img src="${API_DOMAIN}${match['Team-Left']['Logo']}" class="team-logo" alt=""></div>
+
       <div class="match-details-preview">
-        ${detailsContent}
+        ${matchTimeOrResult}
         <span class="match-status ${statusClass}">${match['Match-Status']}</span>
       </div>
-      <div class="team">
-        <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="team-logo">
-        <h3 class="team-name">${match['Team-Right']['Name']}</h3>
-      </div>
+
+      <div><img src="${API_DOMAIN}${match['Team-Right']['Logo']}" class="team-logo" alt=""></div>
+      <div class="team-name">${match['Team-Right']['Name']}</div>
     </div>
   `;
   return div;
 }
+
 
 function createTransferCard(t) {
   const div = document.createElement("div");

@@ -88,7 +88,17 @@ function displayMatches(matches) {
         return acc;
     }, {});
     matchesContainer.innerHTML = Object.values(matchesByCup).map(cupData => `
-        <div class="match-body" data-match-id="${match['Match-id']}">
+        <div class="match-card">
+            <div class="cup-header"><img src="${API_DOMAIN}${cupData.cupInfo['Cup-Logo']}" alt="" class="cup-logo"><h2 class="cup-name">${cupData.cupInfo['Cup-Name']}</h2></div>
+            ${cupData.matches.map(match => {
+                const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة') ?
+                     `<div class="match-time">${new Date(match['Time-Start']).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}</div>`
+    : `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
+                let statusClass = 'status-not-started';
+                if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
+                else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
+                else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
+                return `  <div class="match-body" data-match-id="${match['Match-id']}">
     <div class="match-part part-logo">
       <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
     </div>
@@ -96,7 +106,7 @@ function displayMatches(matches) {
       <span class="team-name">${match['Team-Left']['Name']}</span>
     </div>
     <div class="match-part part-center ${statusClass}">
-      ${matchTimeOrResult}
+      ${detailsContent}
       <span class="match-status">${match['Match-Status']}</span>
     </div>
     <div class="match-part part-name">

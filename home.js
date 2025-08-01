@@ -243,4 +243,9 @@ function createMoreCard(text, viewId) {
 function switchView(viewId) {
   document.querySelectorAll(".view").forEach(view => view.classList.remove("active"));
   document.getElementById(viewId).classList.add("active");
+  document.querySelectorAll('#main-nav .nav-link').forEach(link => link.classList.remove('active'));
+  const targetLink = document.querySelector(`#main-nav .nav-link[data-view="${viewId}"]`);
+  if (targetLink) {
+    targetLink.classList.add('active');
+  }
 }

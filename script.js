@@ -228,7 +228,34 @@ function renderInfo(info, match) {
     if (!info || !match) { panel.innerHTML = "<p style='text-align:center;'>التفاصيل غير متاحة.</p>"; return; }
     const matchTime = new Date(match['Time-Start']);
     const formattedDateTime = matchTime.toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
-    panel.innerHTML = `<div class="info-container"><div class="info-item"><span class="info-label">البطولة:</span><span class="info-value">${match['Cup-Name']}</span></div><div class="info-item"><span class="info-label">التاريخ:</span><span class="info-value" style="direction: ltr; text-align: right;">${formattedDateTime}</span></div><div class="info-item"><span class="info-label">الحالة:</span><span class="info-value">${match['Match-Status']}</span></div><div class="info-item"><span class="info-label">الحكم:</span><span class="info-value">${info['Match-Referee'] || 'غير محدد'}</span></div><div class="info-item"><span class="info-label">الملعب:</span><span class="info-value">${info['Club-Name'] || 'غير محدد'}</span></div><div class="info-item"><span class="info-label">القناة:</span><span class="info-value">${info['Tv'] || 'غير متاح'}</span></div></div>`;
+    panel.innerHTML = `
+    <div class="info-container grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">البطولة:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${match['Cup-Name']}</span>
+  </div>
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">التاريخ:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1 text-left rtl:text-right" dir="ltr">${formattedDateTime}</span>
+  </div>
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">الحالة:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${match['Match-Status']}</span>
+  </div>
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">الحكم:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${info['Match-Referee'] || 'غير محدد'}</span>
+  </div>
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">الملعب:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${info['Club-Name'] || 'غير محدد'}</span>
+  </div>
+  <div class="info-item flex">
+    <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">القناة:</span>
+    <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${info['Tv'] || 'غير متاح'}</span>
+  </div>
+</div>
+`;
 }
 
 function renderLineup(lineup, match) {
@@ -237,7 +264,36 @@ function renderLineup(lineup, match) {
     const renderTeam = (teamData, teamInfo) => {
         const starters = teamData.Team.filter(p => p.Status === 'Starting');
         const substitutes = teamData.Team.filter(p => p.Status === 'Substitute');
-        return `<div class="lineup-team"><div class="lineup-header"><img src="${API_DOMAIN}${teamInfo.Logo}" class="team-logo" alt=""><div><div class="lineup-team-name">${teamData['Team-Name']}</div><div class="lineup-formation">${teamData.Formation}</div></div></div><div class="lineup-section-title">التشكيلة الأساسية</div><ul class="player-list">${starters.map(p => `<li class="player-item"><img src="${API_DOMAIN}${p['Player-Logo']}" class="player-logo" alt=""><span class="player-name">${p['Player-Name']}</span></li>`).join('')}</ul><div class="lineup-section-title">الاحتياط</div><ul class="player-list">${substitutes.map(p => `<li class="player-item"><img src="${API_DOMAIN}${p['Player-Logo']}" class="player-logo" alt=""><span class="player-name">${p['Player-Name']}</span></li>`).join('')}</ul></div>`;
+        return `  <div class="lineup-team space-y-4">
+    <div class="lineup-header flex items-center gap-3">
+      <img src="${API_DOMAIN}${teamInfo.Logo}" alt="${teamData['Team-Name']}" class="w-12 h-12 rounded-full border border-gray-300 dark:border-gray-600" />
+      <div>
+        <div class="text-lg font-bold text-gray-800 dark:text-gray-100">${teamData['Team-Name']}</div>
+        <div class="text-sm text-gray-500 dark:text-gray-400">${teamData.Formation}</div>
+      </div>
+    </div>
+    <div>
+      <div class="text-md font-semibold text-gray-700 dark:text-gray-300 mb-2">التشكيلة الأساسية</div>
+      <ul class="player-list grid grid-cols-1 sm:grid-cols-2 gap-3">
+      ${starters.map(p => `
+        <li class="player-item flex items-center gap-2">
+          <img src="${API_DOMAIN}${p['Player-Logo']}" alt="${p['Player-Name']}" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600" />
+          <span class="player-name text-sm text-gray-800 dark:text-gray-100">${p['Player-Name']}</span>
+        </li>`).join('')}
+      </ul>
+    </div>
+    <div>
+      <div class="text-md font-semibold text-gray-700 dark:text-gray-300 mt-4 mb-2">الاحتياط</div>
+      <ul class="player-list grid grid-cols-1 sm:grid-cols-2 gap-3">
+      ${substitutes.map(p => `
+        <li class="player-item flex items-center gap-2">
+          <img src="${API_DOMAIN}${p['Player-Logo']}" alt="${p['Player-Name']}" class="w-8 h-8 rounded-full border border-gray-300 dark:border-gray-600" />
+          <span class="player-name text-sm text-gray-800 dark:text-gray-100">${p['Player-Name']}</span>
+        </li>
+`).join('')}      </ul>
+    </div>
+  </div>
+  `;
     };
     const currentMatch = allMatchesData.find(m => m['Match-id'] == matchDetailsView.dataset.matchId);
     if (currentMatch) { panel.innerHTML = `<div class="lineup-container">${renderTeam(lineup['Away-Team'], currentMatch['Team-Left'])}${renderTeam(lineup['Home-Team'], currentMatch['Team-Right'])}</div>`; }

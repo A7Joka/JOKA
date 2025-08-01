@@ -88,7 +88,7 @@ function displayMatches(matches) {
         return acc;
     }, {});
     matchesContainer.innerHTML = Object.values(matchesByCup).map(cupData => `
-        <div class="match-card">
+        <div class="match-card bg-gray-200 dark:bg-gray-900">
             <div class="cup-header bg-gray-200 dark:bg-gray-900"><img src="${API_DOMAIN}${cupData.cupInfo['Cup-Logo']}" alt="" class="cup-logo"><h2 class="cup-name">${cupData.cupInfo['Cup-Name']}</h2></div>
             ${cupData.matches.map(match => {
                 const detailsContent = (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'مؤجلة') ?
@@ -98,7 +98,7 @@ function displayMatches(matches) {
                 if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
                 else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
                 else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
-                return `  <div class="match-body bg-gray-200 dark:bg-gray-900" data-match-id="${match['Match-id']}">
+                return `  <div class="match-body bg-gray-200 dark:bg-gray-900 mb-1 mt-1" data-match-id="${match['Match-id']}">
     <div class="match-part part-logo bg-gray-100 dark:bg-gray-700">
       <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
     </div>
@@ -157,15 +157,15 @@ function createMatchCard(match) {
   return div;
 }
 function displayNews() {
-    newsContainer.innerHTML = allNewsData.map((item, index) => `<div class="news-card" data-news-index="${index}"><img src="${item.image}" alt="${item.title}" class="news-image"><div class="news-content"><h2 class="news-title">${item.title}</h2><p class="news-summary">${item.sub_link}</p><p class="news-time">${item.time}</p></div></div>`).join('');
+    newsContainer.innerHTML = allNewsData.map((item, index) => `<div class="news-card bg-gray-200 dark:bg-gray-900" data-news-index="${index}"><img src="${item.image}" alt="${item.title}" class="news-image"><div class="news-content"><h2 class="news-title">${item.title}</h2><p class="news-summary">${item.sub_link}</p><p class="news-time">${item.time}</p></div></div>`).join('');
 }
 
 function displayVideos() {
-    videosContainer.innerHTML = allVideosData.map(item => `<div class="video-card" data-m3u8-url="${item.m3u8_url}"><div class="video-thumbnail-wrapper"><img src="${item.imageurl}" alt="${item.title}" class="video-thumbnail"><div class="play-icon"></div></div><div class="video-content"><h2 class="video-title">${item.title}</h2><p class="video-category">${item.category}</p></div></div>`).join('');
+    videosContainer.innerHTML = allVideosData.map(item => `<div class="video-card bg-gray-200 dark:bg-gray-900" data-m3u8-url="${item.m3u8_url}"><div class="video-thumbnail-wrapper"><img src="${item.imageurl}" alt="${item.title}" class="video-thumbnail"><div class="play-icon"></div></div><div class="video-content"><h2 class="video-title">${item.title}</h2><p class="video-category">${item.category}</p></div></div>`).join('');
 }
 
 function displayTournamentsGrid(tournaments) {
-    tournamentsGrid.innerHTML = tournaments.map((tour, index) => `<div class="tournament-card" data-index="${index}"><img src="${tour.image}" alt="${tour.title}" class="tournament-card-image"><h3 class="tournament-card-title">${tour.title}</h3></div>`).join('');
+    tournamentsGrid.innerHTML = tournaments.map((tour, index) => `<div class="tournament-card bg-gray-200 dark:bg-gray-900" data-index="${index}"><img src="${tour.image}" alt="${tour.title}" class="tournament-card-image"><h3 class="tournament-card-title">${tour.title}</h3></div>`).join('');
 }
 
 function displayStandings(tournament) {
@@ -197,7 +197,7 @@ function displayTransfers(transfers) {
         const priceOrType = item.transfer_price ? item.transfer_price : item.transfer_type;
         const badgeClass = item.transfer_type === 'انتقال حر' ? 'free' : '';
         return `
-        <div class="transfer-card">
+        <div class="transfer-card bg-gray-200 dark:bg-gray-900">
             <div class="transfer-player-section">
                 <img src="${item.player_image}" alt="${item.player_name}" class="transfer-player-image">
                 <div class="transfer-player-details">

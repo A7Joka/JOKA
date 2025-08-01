@@ -98,21 +98,21 @@ function displayMatches(matches) {
                 if (match['Match-Status'] === 'انتهت') statusClass = 'status-finished';
                 else if (match['Match-Status'] === 'مؤجلة') statusClass = 'status-postponed';
                 else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
-                return `  <div class="match-body" data-match-id="${match['Match-id']}">
-    <div class="match-part part-logo">
+                return `  <div class="match-body bg-gray-200 dark:bg-gray-900" data-match-id="${match['Match-id']}">
+    <div class="match-part part-logo bg-gray-100 dark:bg-gray-700">
       <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
     </div>
-    <div class="match-part part-name">
+    <div class="match-part part-name text-gray-800 dark:text-gray-100">
       <span class="team-name">${match['Team-Left']['Name']}</span>
     </div>
     <div class="match-part part-center ${statusClass}">
       ${detailsContent}
       <span class="match-status">${match['Match-Status']}</span>
     </div>
-    <div class="match-part part-name">
+    <div class="match-part part-name text-gray-800 dark:text-gray-100">
       <span class="team-name">${match['Team-Right']['Name']}</span>
     </div>
-    <div class="match-part part-logo">
+    <div class="match-part part-logo bg-gray-100 dark:bg-gray-700">
       <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="match-logo" />
     </div>
   </div>`;

@@ -229,7 +229,7 @@ function renderInfo(info, match) {
     const matchTime = new Date(match['Time-Start']);
     const formattedDateTime = matchTime.toLocaleString('ar-EG', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true });
     panel.innerHTML = `
-    <div class="info-container grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg">
+    <div class="info-container grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 rounded-lg">
   <div class="info-item flex">
     <span class="info-label font-semibold text-gray-700 dark:text-gray-300 w-24">البطولة:</span>
     <span class="info-value text-gray-800 dark:text-gray-100 flex-1">${match['Cup-Name']}</span>

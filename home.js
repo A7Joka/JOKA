@@ -198,7 +198,7 @@ function createNewsCard(item, index = 0) {
 function createVideoCard(item) {
   const div = document.createElement("div");
   div.innerHTML = `
-    <div class="video-card" data-m3u8-url="${item.m3u8_url}">
+    <div class="video-card bg-gray-200 dark:bg-gray-900" data-m3u8-url="${item.m3u8_url}">
       <div class="video-thumbnail-wrapper">
         <img src="${item.imageurl}" alt="${item.title}" class="video-thumbnail">
         <div class="play-icon"></div>

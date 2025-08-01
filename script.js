@@ -272,7 +272,11 @@ function renderStats(statsRight, statsLeft) {
         const maxWidth = maxValues[stat.name];
         const widthRight = (pRight / maxWidth) * 100;
         const widthLeft = (pLeft / maxWidth) * 100;
-        return `<div class="stat-row"><span class="stat-name">${stat.name}</span><div class="stat-row-bars"><div class="stat-team-display team-right"><span class="stat-value">${stat.valueRight}</span><div class="stat-bar-wrapper"><div class="stat-bar team-right-bar" style="width: ${widthRight}%;"></div></div></div><div class="stat-team-display"><span class="stat-value">${stat.valueLeft}</span><div class="stat-bar-wrapper"><div class="stat-bar team-left-bar" style="width: ${widthLeft}%;"></div></div></div></div>`;
+        return `<div class="stat-row">
+  <div class="stat-value">${stat.valueRight}</div>
+  <div class="stat-name">${stat.name}</div>
+  <div class="stat-value">${stat.valueLeft}</div>
+</div>`;
     }).join('')}</div>`;
 }
 

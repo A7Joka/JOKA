@@ -142,21 +142,21 @@ function createMatchCard(match) {
   const div = document.createElement("div");
   div.className = "match-card";
   div.innerHTML = `
-  <div class="match-body" data-match-id="${match['Match-id']}">
-    <div class="match-part part-logo">
+  <div class="match-body bg-gray-200 dark:bg-gray-900" data-match-id="${match['Match-id']}">
+    <div class="match-part part-logo  bg-gray-100 dark:bg-gray-700">
       <img src="${API_DOMAIN}${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
     </div>
-    <div class="match-part part-name">
+    <div class="match-part part-name text-gray-800 dark:text-gray-100">
       <span class="team-name">${match['Team-Left']['Name']}</span>
     </div>
     <div class="match-part part-center ${statusClass}">
       ${matchTimeOrResult}
       <span class="match-status">${match['Match-Status']}</span>
     </div>
-    <div class="match-part part-name">
+    <div class="match-part part-name text-gray-800 dark:text-gray-100">
       <span class="team-name">${match['Team-Right']['Name']}</span>
     </div>
-    <div class="match-part part-logo">
+    <div class="match-part part-logo  bg-gray-100 dark:bg-gray-700">
       <img src="${API_DOMAIN}${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="match-logo" />
     </div>
   </div>
@@ -167,7 +167,7 @@ function createMatchCard(match) {
 
 function createTransferCard(t) {
   const div = document.createElement("div");
-  div.className = "bg-white dark:bg-gray-800 p-4 rounded-lg shadow text-center";
+  div.className = "bg-gray-200 dark:bg-gray-900 p-4 rounded-lg shadow text-center";
   div.innerHTML = `
     <img src="${t.player_image}" class="mx-auto w-16 h-16 rounded-full mb-2" />
     <p class="font-semibold">${t.player_name}</p>
@@ -183,7 +183,7 @@ function createTransferCard(t) {
 function createNewsCard(item, index = 0) {
   const div = document.createElement("div");
   div.innerHTML = `
-    <div class="news-card" data-news-index="${index}">
+    <div class="news-card bg-gray-200 dark:bg-gray-900" data-news-index="${index}">
       <img src="${item.image}" alt="${item.title}" class="news-image">
       <div class="news-content">
         <h2 class="news-title">${item.title}</h2>
@@ -216,7 +216,7 @@ function createVideoCard(item) {
 function createTournamentCard(tour, index = 0) {
   const div = document.createElement("div");
   div.innerHTML = `
-    <div class="tournament-card" data-index="${index}">
+    <div class="tournament-card bg-gray-200 dark:bg-gray-900" data-index="${index}">
       <img src="${tour.image}" alt="${tour.title}" class="tournament-card-image">
       <h3 class="tournament-card-title">${tour.title}</h3>
     </div>

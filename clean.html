@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ar">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase Matches Cleaner</title>
+</head>
+
+<body>
+    <h2>تشغيل تنظيف المباريات</h2>
+    <button id="startClean">ابدأ التنظيف</button>
+    <pre id="log"></pre>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+        // --- CONFIG ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+            authDomain: "website-f388d.firebaseapp.com",
+            projectId: "website-f388d",
+            storageBucket: "website-f388d.appspot.com",
+            messagingSenderId: "531820596793",
+            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+            measurementId: "G-75KT28HL7H"
+        };
+
+        // Init
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        const logBox = document.getElementById("log");
+        function log(msg) {
+            logBox.textContent += msg + "\n";
+        }
+
+        async function cleanMatches() {
+            log("🚀 Starting cleaning process...");
+
+            try {
+                const matchesRef = collection(db, "matches");
+                const snapshot = await getDocs(matchesRef);
+
+                if (snapshot.empty) {
+                    log("❌ No matches found.");
+                    return;
+                }
+
+                for (let matchDoc of snapshot.docs) {
+                    const matchId = matchDoc.id;
+
+                    try {
+                        const stateUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
+                        const res = await fetch(stateUrl);
+                        const data = await res.json();
+
+                        const status = data["Match-Status"] || "";
+
+                        if (!status || status.includes("إنتهت المباراة")) {
+                            await deleteDoc(doc(db, "matches", matchId));
+                            log(`🗑️ Deleted match: ${matchId}`);
+                        } else {
+                            log(`⏩ Match still active: ${matchId}`);
+                        }
+                    } catch (err) {
+                        log(`⚠️ Error checking match ${matchId}: ${err.message}`);
+                    }
+                }
+            } catch (err) {
+                log(`❌ Error fetching matches: ${err.message}`);
+            }
+
+            log("🎯 Cleaning done!");
+        }
+
+        document.getElementById("startClean").addEventListener("click", cleanMatches);
+    </script>
+</body>
+
+</html>

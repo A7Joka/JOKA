@@ -109,16 +109,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
         import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // --- CONFIG & GLOBAL VARS (from your project settings) ---
-const firebaseConfig = {
-  apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
-  authDomain: "website-f388d.firebaseapp.com",
-  projectId: "website-f388d",
-  storageBucket: "website-f388d.firebasestorage.app",
-  messagingSenderId: "531820596793",
-  appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
-  measurementId: "G-75KT28HL7H"
-};
+        // --- CONFIG & GLOBAL VARS ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+            authDomain: "website-f388d.firebaseapp.com",
+            projectId: "website-f388d",
+            storageBucket: "website-f388d.appspot.com",
+            messagingSenderId: "531820596793",
+            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+            measurementId: "G-75KT28HL7H"
+        };
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -132,13 +132,13 @@ const firebaseConfig = {
             p.classList.add('message', type);
             p.innerHTML = message;
             statusMessagesDiv.appendChild(p);
-            statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; // Scroll to bottom
+            statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight;
         }
 
         // --- Main Cleanup Function ---
         async function startCleanupProcess() {
             startCleanupBtn.disabled = true;
-            statusMessagesDiv.innerHTML = ''; // Clear previous messages
+            statusMessagesDiv.innerHTML = '';
             appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
 
             try {
@@ -177,7 +177,7 @@ const firebaseConfig = {
                     } catch (apiError) {
                         appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
                         appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
-                        continue; // Skip to the next match
+                        continue;
                     }
 
                     // 3. Evaluate match status and delete streams if ended
@@ -189,7 +189,7 @@ const firebaseConfig = {
 
                         if (streamsSnapshot.empty) {
                             appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
-                            continue; // No streams to delete, move to next match
+                            continue;
                         }
 
                         let deletedCount = 0;
@@ -206,7 +206,7 @@ const firebaseConfig = {
                     } else {
                         appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
                     }
-                    appendMessage('<hr>', 'info'); // Separator for readability
+                    appendMessage('<hr>', 'info');
                 }
 
                 appendMessage('✨ عملية التنظيف اكتملت!', 'success');
@@ -223,4 +223,3 @@ const firebaseConfig = {
     </script>
 </body>
 </html>
-

@@ -110,15 +110,15 @@
         import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
         // --- CONFIG & GLOBAL VARS (from your project settings) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
-            authDomain: "website-f388d.firebaseapp.com",
-            projectId: "website-f388d",
-            storageBucket: "website-f388d.firebasestorage.app", // <-- CORRECTED
-            messagingSenderId: "531820596793",
-            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
-            measurementId: "G-75KT28HL7H"
-        };
+const firebaseConfig = {
+  apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+  authDomain: "website-f388d.firebaseapp.com",
+  projectId: "website-f388d",
+  storageBucket: "website-f388d.firebasestorage.app",
+  messagingSenderId: "531820596793",
+  appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+  measurementId: "G-75KT28HL7H"
+};
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
@@ -223,3 +223,4 @@
     </script>
 </body>
 </html>
+

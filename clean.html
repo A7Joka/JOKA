@@ -1,225 +1,257 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أداة تنظيف سيرفرات المباريات</title>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-        }
-        h1 {
-            color: #007bff;
-            margin-bottom: 25px;
-            font-size: 2em;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        #status-messages {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            text-align: left;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-        }
-        .message {
-            margin-bottom: 8px;
-            line-height: 1.6;
-            color: #495057;
-            border-bottom: 1px dotted #ced4da;
-            padding-bottom: 5px;
-        }
-        .message:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .success { color: #28a745; font-weight: bold; }
-        .error { color: #dc3545; font-weight: bold; }
-        .info { color: #17a2b8; }
-        .warning { color: #ffc107; }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #007bff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>أداة تنظيف السيرفرات — Hantera TV</title>
+  <style>
+    body { font-family: Inter, system-ui, sans-serif; background:#0f172a; color:#e6eef8; padding:20px; }
+    .card { background:#0b1220; border-radius:12px; padding:16px; box-shadow:0 6px 18px rgba(2,6,23,0.6); }
+    button { background:#06b6d4; color:#012; border:0; padding:10px 14px; border-radius:10px; cursor:pointer; }
+    button.warn { background:#f97316; color:#fff; }
+    pre { white-space:pre-wrap; word-wrap:break-word; max-height:48vh; overflow:auto; background:#071024; padding:12px; border-radius:8px; }
+    .controls { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+    label { font-size:14px; }
+    input[type=checkbox] { width:18px; height:18px; }
+    .stats { display:flex; gap:12px; margin-top:8px; font-size:13px; color:#9fb7cb; }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>أداة تنظيف سيرفرات المباريات المنتهية 🧹</h1>
-        <button id="start-cleanup-btn">ابدأ التنظيف</button>
-        <div id="status-messages">
-            <p class="info">اضغط على "ابدأ التنظيف" لبدء العملية.</p>
-        </div>
+  <div class="card" style="max-width:980px;margin:0 auto;">
+    <h1 style="margin:0 0 8px 0;">🧹 أداة تنظيف سيرفرات البث (Matches → streams)</h1>
+    <p style="margin:0 0 12px 0;color:#9fb7cb">تتحقق من كل مباراة في مجموعة <code>matches</code> وتُزيل مستندات الـ <code>streams</code> للمباريات المنتهية. تعمل من المتصفح.</p>
+
+    <div class="controls">
+      <button id="startBtn">ابدأ التنظيف</button>
+      <button id="clearLog" class="warn">مسح اللوغ</button>
+      <label><input type="checkbox" id="dryRun" checked /> تجربة فقط (dry-run)</label>
+      <label><input type="checkbox" id="delMatchIfEmpty" /> حذف مستند المباراة لو بقى بدون streams</label>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+    <div class="stats" id="stats">
+      <div>مباريات مفحوصة: <strong id="checked">0</strong></div>
+      <div>سيرفرات محذوفة: <strong id="deleted">0</strong></div>
+      <div>أخطاء: <strong id="errors">0</strong></div>
+    </div>
 
-        // --- CONFIG & GLOBAL VARS ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
-            authDomain: "website-f388d.firebaseapp.com",
-            projectId: "website-f388d",
-            storageBucket: "website-f388d.appspot.com",
-            messagingSenderId: "531820596793",
-            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
-            measurementId: "G-75KT28HL7H"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    <h3 style="margin-top:12px">لوغ التنفيذ</h3>
+    <pre id="log">جاهز. اضغط "ابدأ التنظيف".</pre>
 
-        // --- DOM Elements ---
-        const startCleanupBtn = document.getElementById('start-cleanup-btn');
-        const statusMessagesDiv = document.getElementById('status-messages');
+    <p style="margin-top:12px;color:#8aa6bf;font-size:13px">
+      ملاحظة: اذا كانت قواعد Firestore تمنع الحذف من متصفحك، استخدم Cloud Function مع Admin SDK أو عدّل القواعد مؤقتاً للاختبار.
+    </p>
+  </div>
 
-        // --- Helper function to append messages ---
-        function appendMessage(message, type = 'info') {
-            const p = document.createElement('p');
-            p.classList.add('message', type);
-            p.innerHTML = message;
-            statusMessagesDiv.appendChild(p);
-            statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight;
+<script type="module">
+  // --------------- تكوين Firebase (من الكونسول اللي شاركته) ----------------
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+  import {
+    getFirestore, collection, getDocs, doc, getDoc, deleteDoc, query, where, limit
+  } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+    authDomain: "website-f388d.firebaseapp.com",
+    projectId: "website-f388d",
+    storageBucket: "website-f388d.firebasestorage.app",
+    messagingSenderId: "531820596793",
+    appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+    measurementId: "G-75KT28HL7H"
+  };
+
+  // init
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ---------------- UI elements ----------------
+  const startBtn = document.getElementById('startBtn');
+  const logEl = document.getElementById('log');
+  const dryRunEl = document.getElementById('dryRun');
+  const deletedEl = document.getElementById('deleted');
+  const checkedEl = document.getElementById('checked');
+  const errorsEl = document.getElementById('errors');
+  const clearLogBtn = document.getElementById('clearLog');
+  const delMatchIfEmptyEl = document.getElementById('delMatchIfEmpty');
+
+  let stats = { checked:0, deleted:0, errors:0 };
+
+  function log(...messages){
+    const time = new Date().toLocaleTimeString();
+    logEl.textContent = `[${time}] ` + messages.join(' ') + "\\n" + logEl.textContent;
+  }
+  function updateStats(){ checkedEl.textContent = stats.checked; deletedEl.textContent = stats.deleted; errorsEl.textContent = stats.errors; }
+
+  clearLogBtn.onclick = () => { logEl.textContent = ''; };
+
+  // ------------- logic config -------------
+  const API_ENDPOINT = "https://ko.best-goal.live/state.php?match_id=";
+  // الحَاالت اللي نعتبرها "انتهت" بالضبط — عدّل هنا لو عايز حالات إضافية
+  const FINISHED_STATUSES = new Set([
+    "إنتهت المباراة",
+    "إنتهت المباراة - ركلات الترجيح",
+    "ended",
+    "finished"
+  ]);
+
+  // rate limiter بسيط: عدد طلبات API متزامنة
+  const MAX_CONCURRENCY = 6;
+
+  // ------------- helper: limited concurrency runner -------------
+  async function pMap(inputs, mapper, concurrency = 4){
+    const result = [];
+    const executing = [];
+    for (const item of inputs){
+      const p = Promise.resolve().then(() => mapper(item));
+      result.push(p);
+      executing.push(p);
+      if (executing.length >= concurrency){
+        await Promise.race(executing).catch(()=>{}); // swallow so loop continues, errors counted inside mapper
+        // remove resolved
+        for (let i = executing.length-1; i>=0; i--){
+          if (executing[i].settled) executing.splice(i,1);
+        }
+      }
+    }
+    return Promise.allSettled(result);
+  }
+
+  // mark settled helper
+  function markSettled(p){
+    p.then(()=>p.settled = true, ()=>p.settled = true);
+    return p;
+  }
+
+  // ------------- main cleaning function -------------
+  async function runCleanup(){
+    startBtn.disabled = true;
+    const isDry = dryRunEl.checked;
+    const delMatchIfEmpty = delMatchIfEmptyEl.checked;
+    log("ابدأ الفحص. dry-run =", isDry ? "نعم" : "لا");
+
+    try {
+      const matchesCol = collection(db, "matches");
+      const snapshot = await getDocs(matchesCol);
+      if (snapshot.empty){
+        log("ما فيش مباريات في مجموعة 'matches'. إيقاف.");
+        startBtn.disabled = false;
+        return;
+      }
+      const docs = [];
+      snapshot.forEach(d => docs.push({ id: d.id, ref: d.ref }));
+
+      log("عدد المباريات الموجودة:", docs.length);
+
+      // process each match with limited concurrency
+      const processMatch = async (m) => {
+        stats.checked++; updateStats();
+        const matchId = m.id;
+        log("فحص المباراة:", matchId);
+
+        // call external API
+        let statusText = null;
+        try{
+          const res = await fetch(API_ENDPOINT + encodeURIComponent(matchId), {cache:"no-store"});
+          if (!res.ok){
+            throw new Error("API response " + res.status);
+          }
+          const json = await res.json().catch(()=>null);
+          // try a few possible fields
+          statusText = json?.["Match-Status"] ?? json?.match_status ?? json?.status ?? null;
+          // fallback: if API returns raw text:
+          if (!statusText && typeof json === "string") statusText = json;
+          log("  status for", matchId, "→", statusText ?? "(غير معروف)");
+        }catch(err){
+          stats.errors++; updateStats();
+          log("  خطأ أثناء جلب حالة المباراة", matchId, ":", err.message);
+          return;
         }
 
-        // --- Main Cleanup Function ---
-        async function startCleanupProcess() {
-            startCleanupBtn.disabled = true;
-            statusMessagesDiv.innerHTML = '';
-            appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
+        if (!statusText) return; // لا نعرف الحالة
 
-            try {
-                // 1. Get all match documents from "matches" collection
-                appendMessage('<span class="spinner"></span> جاري جلب جميع المباريات من Firestore...', 'info');
-                const matchesCollectionRef = collection(db, "matches");
-                const matchesSnapshot = await getDocs(matchesCollectionRef);
+        if (!FINISHED_STATUSES.has(statusText.trim())){
+          log("  المباراة لم تنتهِ (تخطى).");
+          return;
+        }
 
-                if (matchesSnapshot.empty) {
-                    appendMessage('✅ لا توجد مباريات في قاعدة البيانات.', 'success');
-                    startCleanupBtn.disabled = false;
-                    return;
-                }
-
-                appendMessage(`💡 تم العثور على ${matchesSnapshot.size} مباراة في Firestore.`, 'info');
-
-                for (const matchDoc of matchesSnapshot.docs) {
-                    const matchId = matchDoc.id;
-                    appendMessage(`⏳ جاري فحص المباراة ID: <strong>${matchId}</strong>...`, 'info');
-
-                    // 2. Fetch match status from external API
-                    const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
-                    let matchStatus = null;
-
-                    try {
-                        const response = await fetch(apiUrl);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        const data = await response.json();
-                        matchStatus = data['Match-Status'];
-                        if (!matchStatus) {
-                            throw new Error("Match-Status not found in API response.");
-                        }
-                        appendMessage(`🔍 حالة المباراة ID <strong>${matchId}</strong>: <strong>${matchStatus}</strong>`, 'info');
-                    } catch (apiError) {
-                        appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
-                        appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
-                        continue;
-                    }
-
-                    // 3. Evaluate match status and delete streams if ended
-                    if (matchStatus === 'إنتهت المباراة' || matchStatus === 'إنتهت المباراة - ركلات الترجيح') {
-                        appendMessage(`🎉 المباراة <strong>${matchId}</strong> انتهت. جاري حذف سيرفرات البث...`, 'info');
-
-                        const streamsCollectionRef = collection(db, "matches", matchId, "streams");
-                        const streamsSnapshot = await getDocs(streamsCollectionRef);
-
-                        if (streamsSnapshot.empty) {
-                            appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
-                            continue;
-                        }
-
-                        let deletedCount = 0;
-                        for (const streamDoc of streamsSnapshot.docs) {
-                            try {
-                                await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
-                                appendMessage(`🗑️ تم حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>.`, 'success');
-                                deletedCount++;
-                            } catch (deleteError) {
-                                appendMessage(`❌ فشل حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>: ${deleteError.message}`, 'error');
-                            }
-                        }
-                        appendMessage(`✅ تم حذف <strong>${deletedCount}</strong> سيرفر بث للمباراة <strong>${matchId}</strong>.`, 'success');
-                    } else {
-                        appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
-                    }
-                    appendMessage('<hr>', 'info');
-                }
-
-                appendMessage('✨ عملية التنظيف اكتملت!', 'success');
-
-            } catch (firestoreError) {
-                appendMessage(`🚨 حدث خطأ غير متوقع أثناء الاتصال بـ Firestore: ${firestoreError.message}`, 'error');
-            } finally {
-                startCleanupBtn.disabled = false;
+        // المباراة انتهت — نحذف الـ streams
+        log("  المباراة مُنتهية → تنظيف streams...");
+        // جلب الـ streams subcollection
+        try{
+          const streamsColPath = `matches/${matchId}/streams`;
+          // الحل البسيط: نفعل getDocs على المسار
+          const streamsSnapshot = await getDocs(collection(db, "matches", matchId, "streams"));
+          if (streamsSnapshot.empty){
+            log("    لا توجد streams للمباراة:", matchId);
+            if (delMatchIfEmpty && !isDry){
+              log("    حذف مستند المباراة لأنه فارغ من streams:", matchId);
+              await deleteDoc(doc(db, "matches", matchId));
             }
-        }
+            return;
+          }
 
-        // --- Event Listener ---
-        startCleanupBtn.addEventListener('click', startCleanupProcess);
-    </script>
+          const deletes = [];
+          streamsSnapshot.forEach(docSnap => {
+            deletes.push({ id: docSnap.id, ref: docSnap.ref });
+          });
+
+          for (const s of deletes){
+            if (isDry){
+              log("    [dry] كان حيتم حذف stream:", s.id);
+            }else{
+              try{
+                await deleteDoc(s.ref);
+                stats.deleted++; updateStats();
+                log("    حذف stream:", s.id);
+              }catch(e){
+                stats.errors++; updateStats();
+                log("    خطأ أثناء حذف stream", s.id, ":", e.message);
+              }
+            }
+          }
+
+          // بعد حذف كل الـ streams، لو اختار المستخدم حذف المباراة لو فاضية
+          if (!isDry && delMatchIfEmpty){
+            // تحقق إن المجموعة الفرعية فاضية
+            const after = await getDocs(collection(db, "matches", matchId, "streams"));
+            if (after.empty){
+              try {
+                await deleteDoc(doc(db, "matches", matchId));
+                log("    حذف مستند المباراة بعد تنظيف streams:", matchId);
+              } catch(e){
+                stats.errors++; updateStats();
+                log("    فشل حذف مستند المباراة:", e.message);
+              }
+            } else {
+              log("    بعد الحذف، لا زالت هنالك streams لم تُحذف (ربما بسبب قواعد/permissions).");
+            }
+          }
+
+        }catch(e){
+          stats.errors++; updateStats();
+          log("  خطأ أثناء الوصول لمجموعة streams:", e.message);
+        }
+      }; // end processMatch
+
+      // use concurrency
+      const mapper = (m) => markSettled(processMatch(m));
+      const all = [];
+      for (let i = 0; i < docs.length; i += MAX_CONCURRENCY){
+        const chunk = docs.slice(i, i + MAX_CONCURRENCY).map(mapper);
+        await Promise.all(chunk);
+      }
+
+      log("انتهت العملية. إجمالي مباريت مفحوصة:", stats.checked, "إجمالي محذوف:", stats.deleted, "أخطاء:", stats.errors);
+    }catch(err){
+      stats.errors++; updateStats();
+      log("خطأ عام:", err.message);
+    } finally {
+      updateStats();
+      startBtn.disabled = false;
+    }
+  }
+
+  startBtn.onclick = runCleanup;
+
+</script>
 </body>
 </html>

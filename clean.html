@@ -8,6 +8,40 @@
 <h2>تشغيل تنظيف المباريات</h2>
 <button id="startClean">ابدأ التنظيف</button>
 <pre id="log"></pre>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+    authDomain: "website-f388d.firebaseapp.com",
+    projectId: "website-f388d",
+    storageBucket: "website-f388d.appspot.com",
+    messagingSenderId: "531820596793",
+    appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+    measurementId: "G-75KT28HL7H"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+async function run() {
+    console.log("🚀 Signing in anonymously...");
+    await signInAnonymously(auth);
+
+    console.log("📦 Fetching matches...");
+    const matchesRef = collection(db, "matches");
+    const snapshot = await getDocs(matchesRef);
+
+    console.log(`Found ${snapshot.size} matches`);
+    snapshot.forEach(doc => console.log(doc.id, doc.data()));
+}
+
+run();
+</script>
+
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -83,3 +117,4 @@ document.getElementById("startClean").addEventListener("click", cleanMatches);
 </script>
 </body>
 </html>
+

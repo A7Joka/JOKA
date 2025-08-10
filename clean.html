@@ -135,91 +135,96 @@
             statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; // Scroll to bottom
         }
 
-        // --- Main Cleanup Function ---
-        async function startCleanupProcess() {
-            startCleanupBtn.disabled = true;
-            statusMessagesDiv.innerHTML = ''; // Clear previous messages
-            appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
+       // ... (الكود السابق) ...
+
+async function startCleanupProcess() {
+    startCleanupBtn.disabled = true;
+    statusMessagesDiv.innerHTML = ''; // Clear previous messages
+    appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
+
+    try {
+        // 1. Get all match documents from "matches" collection
+        appendMessage('<span class="spinner"></span> جاري جلب جميع المباريات من Firestore...', 'info');
+        const matchesCollectionRef = collection(db, "matches");
+        const matchesSnapshot = await getDocs(matchesCollectionRef);
+
+        if (matchesSnapshot.empty) {
+            appendMessage('✅ لا توجد مباريات في قاعدة البيانات.', 'success');
+            startCleanupBtn.disabled = false;
+            return;
+        }
+
+        appendMessage(`💡 تم العثور على ${matchesSnapshot.size} مباراة في Firestore.`, 'info');
+
+        for (const matchDoc of matchesSnapshot.docs) {
+            const matchId = matchDoc.id;
+            appendMessage(`⏳ جاري فحص المباراة ID: <strong>${matchId}</strong>...`, 'info');
+
+            // 2. Fetch match status from external API
+            const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
+            let matchStatus = null;
 
             try {
-                // 1. Get all match documents from "matches" collection
-                appendMessage('<span class="spinner"></span> جاري جلب جميع المباريات من Firestore...', 'info');
-                const matchesCollectionRef = collection(db, "matches");
-                const matchesSnapshot = await getDocs(matchesCollectionRef);
-
-                if (matchesSnapshot.empty) {
-                    appendMessage('✅ لا توجد مباريات في قاعدة البيانات.', 'success');
-                    startCleanupBtn.disabled = false;
-                    return;
+                const response = await fetch(apiUrl);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-
-                appendMessage(`💡 تم العثور على ${matchesSnapshot.size} مباراة في Firestore.`, 'info');
-
-                for (const matchDoc of matchesSnapshot.docs) {
-                    const matchId = matchDoc.id;
-                    appendMessage(`⏳ جاري فحص المباراة ID: <strong>${matchId}</strong>...`, 'info');
-
-                    // 2. Fetch match status from external API
-                    const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
-                    let matchStatus = null;
-
-                    try {
-                        const response = await fetch(apiUrl);
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-                        const data = await response.json();
-                        matchStatus = data['Match-Status'];
-                        if (!matchStatus) {
-                            throw new Error("Match-Status not found in API response.");
-                        }
-                        appendMessage(`🔍 حالة المباراة ID <strong>${matchId}</strong>: <strong>${matchStatus}</strong>`, 'info');
-                    } catch (apiError) {
-                        appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
-                        appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
-                        continue; // Skip to the next match
-                    }
-
-                    // 3. Evaluate match status and delete streams if ended
-                    if (matchStatus === 'إنتهت المباراة' || matchStatus === 'إنتهت المباراة - ركلات الترجيح') {
-                        appendMessage(`🎉 المباراة <strong>${matchId}</strong> انتهت. جاري حذف سيرفرات البث...`, 'info');
-
-                        const streamsCollectionRef = collection(db, "matches", matchId, "streams");
-                        const streamsSnapshot = await getDocs(streamsCollectionRef);
-
-                        if (streamsSnapshot.empty) {
-                            appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
-                            continue; // No streams to delete, move to next match
-                        }
-
-                        let deletedCount = 0;
-                        for (const streamDoc of streamsSnapshot.docs) {
-                            try {
-                                await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
-                                appendMessage(`🗑️ تم حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>.`, 'success');
-                                deletedCount++;
-                            } catch (deleteError) {
-                                appendMessage(`❌ فشل حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>: ${deleteError.message}`, 'error');
-                            }
-                        }
-                        appendMessage(`✅ تم حذف <strong>${deletedCount}</strong> سيرفر بث للمباراة <strong>${matchId}</strong>.`, 'success');
-                    } else {
-                        appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
-                    }
-                    appendMessage('<hr>', 'info'); // Separator for readability
+                const data = await response.json();
+                matchStatus = data['Match-Status'];
+                if (!matchStatus) {
+                    throw new Error("Match-Status not found in API response.");
                 }
-
-                appendMessage('✨ عملية التنظيف اكتملت!', 'success');
-
-            } catch (firestoreError) {
-                appendMessage(`🚨 حدث خطأ غير متوقع أثناء الاتصال بـ Firestore: ${firestoreError.message}`, 'error');
-            } finally {
-                startCleanupBtn.disabled = false;
+                appendMessage(`🔍 حالة المباراة ID <strong>${matchId}</strong>: <strong>${matchStatus}</strong>`, 'info');
+            } catch (apiError) {
+                appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
+                appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
+                continue; // Skip to the next match
             }
+
+            // 3. Evaluate match status and delete streams if ended
+            if (matchStatus === 'إنتهت المباراة' || matchStatus === 'إنتهت المباراة - ركلات الترجيح') {
+                appendMessage(`🎉 المباراة <strong>${matchId}</strong> انتهت. جاري حذف سيرفرات البث...`, 'info');
+
+                const streamsCollectionRef = collection(db, "matches", matchId, "streams");
+                const streamsSnapshot = await getDocs(streamsCollectionRef);
+
+                if (streamsSnapshot.empty) {
+                    appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
+                    // لا توجد سيرفرات، لا يوجد شيء لحذفه.
+                    continue; // Skip to the next match
+                }
+
+                let deletedCount = 0;
+                for (const streamDoc of streamsSnapshot.docs) {
+                    try {
+                        await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
+                        appendMessage(`🗑️ تم حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>.`, 'success');
+                        deletedCount++;
+                    } catch (deleteError) {
+                        appendMessage(`❌ فشل حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>: ${deleteError.message}`, 'error');
+                    }
+                }
+                appendMessage(`✅ تم حذف <strong>${deletedCount}</strong> سيرفر بث للمباراة <strong>${matchId}</strong>.`, 'success');
+            } else {
+                appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
+            }
+            appendMessage('<hr>', 'info'); // Separator for readability
         }
+
+        appendMessage('✨ عملية التنظيف اكتملت!', 'success');
+
+    } catch (firestoreError) {
+        appendMessage(`🚨 حدث خطأ غير متوقع أثناء الاتصال بـ Firestore: ${firestoreError.message}`, 'error');
+    } finally {
+        startCleanupBtn.disabled = false;
+    }
+}
+
+// ... (بقية الكود) ...
 
         // --- Event Listener ---
         startCleanupBtn.addEventListener('click', startCleanupProcess);
     </script>
 </body>
 </html>
+

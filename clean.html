@@ -2,114 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>أداة تنظيف سيرفرات المباريات</title>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
-    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            background-color: #f0f2f5;
-            color: #333;
-            margin: 0;
-            padding: 20px;
-            box-sizing: border-box;
-            text-align: center;
-        }
-        .container {
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 600px;
-        }
-        h1 {
-            color: #007bff;
-            margin-bottom: 25px;
-            font-size: 2em;
-        }
-        button {
-            background-color: #007bff;
-            color: white;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            margin-top: 20px;
-        }
-        button:hover {
-            background-color: #0056b3;
-            transform: translateY(-2px);
-        }
-        button:disabled {
-            background-color: #cccccc;
-            cursor: not-allowed;
-        }
-        #status-messages {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #e9ecef;
-            border-radius: 8px;
-            text-align: left;
-            max-height: 300px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-        }
-        .message {
-            margin-bottom: 8px;
-            line-height: 1.6;
-            color: #495057;
-            border-bottom: 1px dotted #ced4da;
-            padding-bottom: 5px;
-        }
-        .message:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .success { color: #28a745; font-weight: bold; }
-        .error { color: #dc3545; font-weight: bold; }
-        .info { color: #17a2b8; }
-        .warning { color: #ffc107; }
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left-color: #007bff;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            animation: spin 1s linear infinite;
-            display: inline-block;
-            vertical-align: middle;
-            margin-right: 10px;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    </style>
+    <title>تشخيص Firebase المتقدم</title>
 </head>
 <body>
-    <div class="container">
-        <h1>أداة تنظيف سيرفرات المباريات المنتهية 🧹</h1>
-        <button id="start-cleanup-btn">ابدأ التنظيف</button>
-        <div id="status-messages">
-            <p class="info">اضغط على "ابدأ التنظيف" لبدء العملية.</p>
-        </div>
-    </div>
-
+    <h1>جارٍ فحص الاتصال...</h1>
+    <p>افتح Developer Console (F12) لمشاهدة النتائج.</p>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        // --- CONFIG & GLOBAL VARS (من الكود الأصلي) ---
         const firebaseConfig = {
             apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
             authDomain: "website-f388d.firebaseapp.com",
@@ -122,109 +23,34 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- DOM Elements ---
-        const startCleanupBtn = document.getElementById('start-cleanup-btn');
-        const statusMessagesDiv = document.getElementById('status-messages');
+        const collectionName = "matches";
 
-        // --- Helper function to append messages ---
-        function appendMessage(message, type = 'info') {
-            const p = document.createElement('p');
-            p.classList.add('message', type);
-            p.innerHTML = message;
-            statusMessagesDiv.appendChild(p);
-            statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; // Scroll to bottom
-        }
-
-       // ... (الكود السابق) ...
-
-async function startCleanupProcess() {
-    startCleanupBtn.disabled = true;
-    statusMessagesDiv.innerHTML = ''; // Clear previous messages
-    appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
-
-    try {
-        // 1. Get all match documents from "matches" collection
-        appendMessage('<span class="spinner"></span> جاري جلب جميع المباريات من Firestore...', 'info');
-        const matchesCollectionRef = collection(db, "matches");
-        const matchesSnapshot = await getDocs(matchesCollectionRef);
-
-        if (matchesSnapshot.empty) {
-            appendMessage('✅ لا توجد مباريات في قاعدة البيانات.', 'success');
-            startCleanupBtn.disabled = false;
-            return;
-        }
-
-        appendMessage(`💡 تم العثور على ${matchesSnapshot.size} مباراة في Firestore.`, 'info');
-
-        for (const matchDoc of matchesSnapshot.docs) {
-            const matchId = matchDoc.id;
-            appendMessage(`⏳ جاري فحص المباراة ID: <strong>${matchId}</strong>...`, 'info');
-
-            // 2. Fetch match status from external API
-            const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
-            let matchStatus = null;
-
+        async function advancedCheck() {
+            console.log("--- بدء فحص Firebase المتقدم ---");
             try {
-                const response = await fetch(apiUrl);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                const matchesCollectionRef = collection(db, collectionName);
+                const matchesSnapshot = await getDocs(matchesCollectionRef);
+
+                console.log("تم استلام لقطة (snapshot) من قاعدة البيانات.");
+                console.log("هل لقطة البيانات فارغة؟", matchesSnapshot.empty);
+                console.log("عدد المستندات التي تم العثور عليها:", matchesSnapshot.size);
+
+                if (matchesSnapshot.size > 0) {
+                    console.log("تم العثور على مستندات. إليك أول 5 مستندات:");
+                    matchesSnapshot.docs.slice(0, 5).forEach((doc) => {
+                        console.log("  - مستند ID:", doc.id);
+                        console.log("    بيانات المستند:", doc.data());
+                    });
+                } else {
+                    console.log(`❌ لا توجد مستندات في مجموعة "${collectionName}".`);
                 }
-                const data = await response.json();
-                matchStatus = data['Match-Status'];
-                if (!matchStatus) {
-                    throw new Error("Match-Status not found in API response.");
-                }
-                appendMessage(`🔍 حالة المباراة ID <strong>${matchId}</strong>: <strong>${matchStatus}</strong>`, 'info');
-            } catch (apiError) {
-                appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
-                appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
-                continue; // Skip to the next match
+            } catch (error) {
+                console.error("🚨 حدث خطأ غير متوقع:", error);
             }
-
-            // 3. Evaluate match status and delete streams if ended
-            if (matchStatus === 'إنتهت المباراة' || matchStatus === 'إنتهت المباراة - ركلات الترجيح') {
-                appendMessage(`🎉 المباراة <strong>${matchId}</strong> انتهت. جاري حذف سيرفرات البث...`, 'info');
-
-                const streamsCollectionRef = collection(db, "matches", matchId, "streams");
-                const streamsSnapshot = await getDocs(streamsCollectionRef);
-
-                if (streamsSnapshot.empty) {
-                    appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
-                    // لا توجد سيرفرات، لا يوجد شيء لحذفه.
-                    continue; // Skip to the next match
-                }
-
-                let deletedCount = 0;
-                for (const streamDoc of streamsSnapshot.docs) {
-                    try {
-                        await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
-                        appendMessage(`🗑️ تم حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>.`, 'success');
-                        deletedCount++;
-                    } catch (deleteError) {
-                        appendMessage(`❌ فشل حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>: ${deleteError.message}`, 'error');
-                    }
-                }
-                appendMessage(`✅ تم حذف <strong>${deletedCount}</strong> سيرفر بث للمباراة <strong>${matchId}</strong>.`, 'success');
-            } else {
-                appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
-            }
-            appendMessage('<hr>', 'info'); // Separator for readability
+            console.log("--- انتهاء فحص Firebase المتقدم ---");
         }
 
-        appendMessage('✨ عملية التنظيف اكتملت!', 'success');
-
-    } catch (firestoreError) {
-        appendMessage(`🚨 حدث خطأ غير متوقع أثناء الاتصال بـ Firestore: ${firestoreError.message}`, 'error');
-    } finally {
-        startCleanupBtn.disabled = false;
-    }
-}
-
-// ... (بقية الكود) ...
-
-        // --- Event Listener ---
-        startCleanupBtn.addEventListener('click', startCleanupProcess);
+        advancedCheck();
     </script>
 </body>
 </html>
-

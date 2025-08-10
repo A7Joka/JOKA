@@ -6,12 +6,13 @@ import {
 
 // === عدل هنا بالـ firebaseConfig الخاص بمشروعك
 const firebaseConfig = {
-  apiKey: "AIzaSy...YOURKEY",
+  apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
   authDomain: "website-f388d.firebaseapp.com",
   projectId: "website-f388d",
-  storageBucket: "website-f388d.appspot.com",
+  storageBucket: "website-f388d.firebasestorage.app",
   messagingSenderId: "531820596793",
-  appId: "1:531820596793:web:..."
+  appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+  measurementId: "G-75KT28HL7H"
 };
 
 const app = initializeApp(firebaseConfig);

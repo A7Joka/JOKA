@@ -1,117 +1,225 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>تنظيف المباريات</title>
-<style>
-  body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f7f7f7; }
-  #log { white-space: pre-line; background: #fff; border: 1px solid #ccc; padding: 15px; height: 350px; overflow-y: auto; margin-top: 15px; }
-  button { background: #007bff; border: none; color: white; padding: 12px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; }
-  button:disabled { background: #aaa; cursor: default; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة تنظيف سيرفرات المباريات</title>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+    <script type="module" src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f0f2f5;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+        }
+        h1 {
+            color: #007bff;
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            margin-top: 20px;
+        }
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px);
+        }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #status-messages {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #e9ecef;
+            border-radius: 8px;
+            text-align: left;
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #dee2e6;
+        }
+        .message {
+            margin-bottom: 8px;
+            line-height: 1.6;
+            color: #495057;
+            border-bottom: 1px dotted #ced4da;
+            padding-bottom: 5px;
+        }
+        .message:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .success { color: #28a745; font-weight: bold; }
+        .error { color: #dc3545; font-weight: bold; }
+        .info { color: #17a2b8; }
+        .warning { color: #ffc107; }
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: #007bff;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>أداة تنظيف سيرفرات المباريات المنتهية 🧹</h1>
+        <button id="start-cleanup-btn">ابدأ التنظيف</button>
+        <div id="status-messages">
+            <p class="info">اضغط على "ابدأ التنظيف" لبدء العملية.</p>
+        </div>
+    </div>
 
-<h2>تنظيف المباريات</h2>
-<button id="start-clean-btn">ابدأ التنظيف</button>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-<div id="log"></div>
+        // --- CONFIG & GLOBAL VARS (من الكود الأصلي) ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
+            authDomain: "website-f388d.firebaseapp.com",
+            projectId: "website-f388d",
+            storageBucket: "website-f388d.appspot.com",
+            messagingSenderId: "531820596793",
+            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
+            measurementId: "G-75KT28HL7H"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, collection, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+        // --- DOM Elements ---
+        const startCleanupBtn = document.getElementById('start-cleanup-btn');
+        const statusMessagesDiv = document.getElementById('status-messages');
 
-// إعدادات Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
-  authDomain: "website-f388d.firebaseapp.com",
-  projectId: "website-f388d",
-  storageBucket: "website-f388d.appspot.com",
-  messagingSenderId: "531820596793",
-  appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
-  measurementId: "G-75KT28HL7H"
-};
+        // --- Helper function to append messages ---
+        function appendMessage(message, type = 'info') {
+            const p = document.createElement('p');
+            p.classList.add('message', type);
+            p.innerHTML = message;
+            statusMessagesDiv.appendChild(p);
+            statusMessagesDiv.scrollTop = statusMessagesDiv.scrollHeight; // Scroll to bottom
+        }
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+        // --- Main Cleanup Function ---
+        async function startCleanupProcess() {
+            startCleanupBtn.disabled = true;
+            statusMessagesDiv.innerHTML = ''; // Clear previous messages
+            appendMessage('<span class="spinner"></span> جاري بدء عملية التنظيف...', 'info');
 
-const logEl = document.getElementById('log');
-const startBtn = document.getElementById('start-clean-btn');
+            try {
+                // 1. Get all match documents from "matches" collection
+                appendMessage('<span class="spinner"></span> جاري جلب جميع المباريات من Firestore...', 'info');
+                const matchesCollectionRef = collection(db, "matches");
+                const matchesSnapshot = await getDocs(matchesCollectionRef);
 
-function log(text) {
-  logEl.textContent += text + '\n';
-  logEl.scrollTop = logEl.scrollHeight;
-}
+                if (matchesSnapshot.empty) {
+                    appendMessage('✅ لا توجد مباريات في قاعدة البيانات.', 'success');
+                    startCleanupBtn.disabled = false;
+                    return;
+                }
 
-async function fetchMatchStatus(matchId) {
-  try {
-    const res = await fetch(`https://ko.best-goal.live/state.php?match_id=${matchId}`, {cache: 'no-store'});
-    if (!res.ok) return null;
-    return await res.json();
-  } catch {
-    return null;
-  }
-}
+                appendMessage(`💡 تم العثور على ${matchesSnapshot.size} مباراة في Firestore.`, 'info');
 
-async function cleanStreamsForMatch(matchId) {
-  log(`🚀 فحص المباراة ${matchId}...`);
-  const statusData = await fetchMatchStatus(matchId);
+                for (const matchDoc of matchesSnapshot.docs) {
+                    const matchId = matchDoc.id;
+                    appendMessage(`⏳ جاري فحص المباراة ID: <strong>${matchId}</strong>...`, 'info');
 
-  if (!statusData || !statusData["Match-Status"]) {
-    log(`⚠️ لم يتم الحصول على حالة المباراة ${matchId}.\n`);
-    return;
-  }
+                    // 2. Fetch match status from external API
+                    const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
+                    let matchStatus = null;
 
-  if (statusData["Match-Status"].includes("انتهت")) {
-    log(`✅ المباراة ${matchId} انتهت. جاري حذف السيرفرات...`);
-    const streamsRef = collection(db, "matches", matchId, "streams");
-    const streamsSnapshot = await getDocs(streamsRef);
-    if (streamsSnapshot.empty) {
-      log(`⚠️ لا توجد سيرفرات لحذفها في المباراة ${matchId}.\n`);
-      return;
-    }
-    for (const streamDoc of streamsSnapshot.docs) {
-      try {
-        await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
-        log(`✔️ تم حذف سيرفر ${streamDoc.id}`);
-      } catch {
-        log(`❌ فشل حذف سيرفر ${streamDoc.id}`);
-      }
-    }
-    log(`🔹 انتهى حذف السيرفرات للمباراة ${matchId}.\n`);
-  } else {
-    log(`⏳ المباراة ${matchId} ما زالت نشطة.\n`);
-  }
-}
+                    try {
+                        const response = await fetch(apiUrl);
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        const data = await response.json();
+                        matchStatus = data['Match-Status'];
+                        if (!matchStatus) {
+                            throw new Error("Match-Status not found in API response.");
+                        }
+                        appendMessage(`🔍 حالة المباراة ID <strong>${matchId}</strong>: <strong>${matchStatus}</strong>`, 'info');
+                    } catch (apiError) {
+                        appendMessage(`❌ فشل الاتصال بالـ API للمباراة <strong>${matchId}</strong> أو الحصول على حالتها: ${apiError.message}`, 'error');
+                        appendMessage(`➡️ تخطي حذف السيرفرات للمباراة <strong>${matchId}</strong> بسبب خطأ API.`, 'warning');
+                        continue; // Skip to the next match
+                    }
 
-async function startCleaning() {
-  startBtn.disabled = true;
-  logEl.textContent = '';
-  log('🚀 بدء عملية التنظيف...');
+                    // 3. Evaluate match status and delete streams if ended
+                    if (matchStatus === 'إنتهت المباراة' || matchStatus === 'إنتهت المباراة - ركلات الترجيح') {
+                        appendMessage(`🎉 المباراة <strong>${matchId}</strong> انتهت. جاري حذف سيرفرات البث...`, 'info');
 
-  const matchesRef = collection(db, "matches");
-  const matchesSnapshot = await getDocs(matchesRef);
-  
-  if (matchesSnapshot.empty) {
-    log('❌ لا توجد مباريات في قاعدة البيانات.');
-    startBtn.disabled = false;
-    return;
-  }
+                        const streamsCollectionRef = collection(db, "matches", matchId, "streams");
+                        const streamsSnapshot = await getDocs(streamsCollectionRef);
 
-  log(`📦 عدد المباريات: ${matchesSnapshot.size}\n`);
+                        if (streamsSnapshot.empty) {
+                            appendMessage(`ℹ️ لا توجد سيرفرات بث للمباراة <strong>${matchId}</strong>.`, 'info');
+                            continue; // No streams to delete, move to next match
+                        }
 
-  for (const matchDoc of matchesSnapshot.docs) {
-    const matchId = matchDoc.id;
-    await cleanStreamsForMatch(matchId);
-  }
+                        let deletedCount = 0;
+                        for (const streamDoc of streamsSnapshot.docs) {
+                            try {
+                                await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
+                                appendMessage(`🗑️ تم حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>.`, 'success');
+                                deletedCount++;
+                            } catch (deleteError) {
+                                appendMessage(`❌ فشل حذف سيرفر البث <strong>${streamDoc.id}</strong> للمباراة <strong>${matchId}</strong>: ${deleteError.message}`, 'error');
+                            }
+                        }
+                        appendMessage(`✅ تم حذف <strong>${deletedCount}</strong> سيرفر بث للمباراة <strong>${matchId}</strong>.`, 'success');
+                    } else {
+                        appendMessage(`⏭️ المباراة <strong>${matchId}</strong> لم تنتهِ بعد أو حالتها غير قابلة للحذف (${matchStatus}). تم التخطي.`, 'info');
+                    }
+                    appendMessage('<hr>', 'info'); // Separator for readability
+                }
 
-  log('✅ انتهت عملية التنظيف.');
-  startBtn.disabled = false;
-}
+                appendMessage('✨ عملية التنظيف اكتملت!', 'success');
 
-startBtn.addEventListener('click', startCleaning);
-</script>
+            } catch (firestoreError) {
+                appendMessage(`🚨 حدث خطأ غير متوقع أثناء الاتصال بـ Firestore: ${firestoreError.message}`, 'error');
+            } finally {
+                startCleanupBtn.disabled = false;
+            }
+        }
 
+        // --- Event Listener ---
+        startCleanupBtn.addEventListener('click', startCleanupProcess);
+    </script>
 </body>
 </html>

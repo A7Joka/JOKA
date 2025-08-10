@@ -1,43 +1,22 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>تنظيف المباريات</title>
 <style>
-  body {
-    font-family: Arial, sans-serif;
-    background: #f0f0f0;
-    padding: 20px;
-  }
-  #cleanBtn {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 15px 25px;
-    font-size: 18px;
-    cursor: pointer;
-    border-radius: 8px;
-  }
-  #cleanBtn:hover {
-    background: #218838;
-  }
-  #log {
-    margin-top: 20px;
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    height: 400px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-    direction: ltr;
-  }
+  body { font-family: Arial, sans-serif; direction: rtl; padding: 20px; background: #f7f7f7; }
+  #log { white-space: pre-line; background: #fff; border: 1px solid #ccc; padding: 15px; height: 350px; overflow-y: auto; margin-top: 15px; }
+  button { background: #007bff; border: none; color: white; padding: 12px 20px; font-size: 16px; cursor: pointer; border-radius: 5px; }
+  button:disabled { background: #aaa; cursor: default; }
 </style>
 </head>
 <body>
 
-<h1>تنظيف المباريات</h1>
-<button id="cleanBtn">ابدأ التنظيف</button>
-<pre id="log"></pre>
+<h2>تنظيف المباريات</h2>
+<button id="start-clean-btn">ابدأ التنظيف</button>
+
+<div id="log"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -57,63 +36,81 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-const logDom = document.getElementById('log');
-function log(msg) {
-  console.log(msg);
-  logDom.textContent += msg + "\n";
+const logEl = document.getElementById('log');
+const startBtn = document.getElementById('start-clean-btn');
+
+function log(text) {
+  logEl.textContent += text + '\n';
+  logEl.scrollTop = logEl.scrollHeight;
 }
 
-async function cleanMatchesViaApi() {
-  log("🚀 بدء عملية التنظيف...");
+async function fetchMatchStatus(matchId) {
   try {
-    const matchesRef = collection(db, 'matches');
-    const snapshot = await getDocs(matchesRef);
-
-    log(`📦 عدد المباريات: ${snapshot.size}`);
-
-    if (snapshot.empty) {
-      log("❌ لا توجد مباريات");
-      return;
-    }
-
-    for (const matchSnap of snapshot.docs) {
-      const matchId = matchSnap.id;
-
-      try {
-        const apiUrl = `https://ko.best-goal.live/state.php?match_id=${matchId}`;
-        const res = await fetch(apiUrl, { cache: 'no-store' });
-        const text = await res.text();
-
-        let status = '';
-        try {
-          const json = JSON.parse(text);
-          status = json['Match-Status'] || '';
-        } catch {
-          status = text || '';
-        }
-
-        const normalized = status.replace(/إ/g, 'ا').trim();
-        const shouldDelete = !normalized || normalized.includes('انتهت');
-
-        if (shouldDelete) {
-          // حذف الماتش
-          await deleteDoc(doc(db, 'matches', matchId));
-          log(`🗑️ تم حذف الماتش ${matchId}`);
-        } else {
-          log(`⏳ الماتش مازال نشط ${matchId}`);
-        }
-      } catch (err) {
-        log(`⚠️ خطأ في الماتش ${matchId} ${err.message}`);
-      }
-    }
-
-    log("✅ انتهى التنظيف");
-  } catch (err) {
-    log(`❌ خطأ: ${err.message}`);
+    const res = await fetch(`https://ko.best-goal.live/state.php?match_id=${matchId}`, {cache: 'no-store'});
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
   }
 }
 
-document.getElementById('cleanBtn').addEventListener('click', cleanMatchesViaApi);
+async function cleanStreamsForMatch(matchId) {
+  log(`🚀 فحص المباراة ${matchId}...`);
+  const statusData = await fetchMatchStatus(matchId);
+
+  if (!statusData || !statusData["Match-Status"]) {
+    log(`⚠️ لم يتم الحصول على حالة المباراة ${matchId}.\n`);
+    return;
+  }
+
+  if (statusData["Match-Status"].includes("انتهت")) {
+    log(`✅ المباراة ${matchId} انتهت. جاري حذف السيرفرات...`);
+    const streamsRef = collection(db, "matches", matchId, "streams");
+    const streamsSnapshot = await getDocs(streamsRef);
+    if (streamsSnapshot.empty) {
+      log(`⚠️ لا توجد سيرفرات لحذفها في المباراة ${matchId}.\n`);
+      return;
+    }
+    for (const streamDoc of streamsSnapshot.docs) {
+      try {
+        await deleteDoc(doc(db, "matches", matchId, "streams", streamDoc.id));
+        log(`✔️ تم حذف سيرفر ${streamDoc.id}`);
+      } catch {
+        log(`❌ فشل حذف سيرفر ${streamDoc.id}`);
+      }
+    }
+    log(`🔹 انتهى حذف السيرفرات للمباراة ${matchId}.\n`);
+  } else {
+    log(`⏳ المباراة ${matchId} ما زالت نشطة.\n`);
+  }
+}
+
+async function startCleaning() {
+  startBtn.disabled = true;
+  logEl.textContent = '';
+  log('🚀 بدء عملية التنظيف...');
+
+  const matchesRef = collection(db, "matches");
+  const matchesSnapshot = await getDocs(matchesRef);
+  
+  if (matchesSnapshot.empty) {
+    log('❌ لا توجد مباريات في قاعدة البيانات.');
+    startBtn.disabled = false;
+    return;
+  }
+
+  log(`📦 عدد المباريات: ${matchesSnapshot.size}\n`);
+
+  for (const matchDoc of matchesSnapshot.docs) {
+    const matchId = matchDoc.id;
+    await cleanStreamsForMatch(matchId);
+  }
+
+  log('✅ انتهت عملية التنظيف.');
+  startBtn.disabled = false;
+}
+
+startBtn.addEventListener('click', startCleaning);
 </script>
 
 </body>

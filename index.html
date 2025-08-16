@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>لوحة التحكم</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     body {
@@ -15,11 +16,12 @@
     .card {
       background-color: #2d3748;
       border-radius: 12px;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: transform 0.2s;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+      transition: transform 0.2s, box-shadow 0.2s;
     }
     .card:hover {
       transform: translateY(-5px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
     .btn {
       transition: background-color 0.2s, transform 0.2s;
@@ -30,125 +32,217 @@
     .dialog-overlay {
       background-color: rgba(0, 0, 0, 0.7);
     }
+    .notification {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      padding: 1rem 2rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: opacity 0.3s ease-in-out;
+      opacity: 0;
+      pointer-events: none;
+    }
+    .notification.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .input-group {
+      position: relative;
+      margin-bottom: 2rem;
+    }
+    .input-group input {
+      background-color: transparent;
+      border: 2px solid #4a5568;
+      border-radius: 8px;
+      padding: 0.75rem;
+      width: 100%;
+      color: #e2e8f0;
+      transition: border-color 0.2s, padding 0.2s;
+    }
+    .input-group input:focus {
+      outline: none;
+      border-color: #63b3ed;
+    }
+    .input-group label {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      color: #a0aec0;
+      transition: all 0.2s ease-out;
+      pointer-events: none;
+    }
+    .input-group input:focus + label,
+    .input-group input:not(:placeholder-shown) + label {
+      top: -1.25rem;
+      right: 0;
+      font-size: 0.8rem;
+      color: #63b3ed;
+    }
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #fff;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="p-4 md:p-8">
   <div class="container mx-auto">
     <h1 class="text-3xl font-bold mb-8 text-center text-white">لوحة تحكم إدارة المحتوى</h1>
-    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-      <!-- Update and Maintenance Card -->
-      <div id="upd-seana-card" class="card p-6 flex flex-col justify-between items-center text-center">
-        <h2 class="text-xl font-semibold mb-4">التحديث والصيانة</h2>
-        <div class="flex items-center gap-4 mb-4">
-          <input type="text" id="updateVersionInput" placeholder="رقم التحديث" class="bg-gray-700 text-white rounded-md p-2 w-24">
-          <button id="updateBtn" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">تحديث</button>
+      <!-- Update Card -->
+      <div id="update-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+        <i class="fas fa-sync-alt text-4xl mb-2 text-blue-400"></i>
+        <span class="font-semibold text-lg">تحديث</span>
+      </div>
+
+      <!-- Maintenance Card -->
+      <div id="maintenance-card" class="card p-6 flex flex-col justify-center items-center text-center">
+        <div class="flex flex-col items-center">
+          <i id="maintenance-icon" class="fas fa-tools text-4xl mb-2 text-gray-400"></i>
+          <span class="font-semibold text-lg mb-2">صيانة</span>
         </div>
-        <div class="flex items-center gap-2">
-          <span class="text-sm">وضع الصيانة:</span>
+        <div class="flex items-center">
           <label for="maintenanceSwitch" class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="maintenanceSwitch" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
           </label>
         </div>
       </div>
 
       <!-- Links Card -->
-      <div id="urls-card" class="card p-6 text-center">
-        <h2 class="text-xl font-semibold mb-4">الروابط</h2>
-        <button id="editUrlsBtn" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full">تعديل الروابط</button>
+      <div id="links-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+        <i class="fas fa-link text-4xl mb-2 text-yellow-400"></i>
+        <span class="font-semibold text-lg">الروابط</span>
       </div>
-    </div>
     
+      <!-- Matches Card -->
+      <div id="matches-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+        <i class="fas fa-futbol text-4xl mb-2 text-red-400"></i>
+        <span class="font-semibold text-lg">المباريات</span>
+      </div>
+
+    </div>
+
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-      <!-- Competitions Card -->
+      <!-- Competitions Section -->
       <div id="competitions-section" class="card p-6">
-        <h2 class="text-xl font-semibold mb-4 text-center">البطولات</h2>
-        <button id="addCompetitionBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">إضافة بطولة</button>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">البطولات</h2>
+          <button id="addCompetitionBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
+            <i class="fas fa-plus"></i> إضافة
+          </button>
+        </div>
         <div id="competitions-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           <!-- Competition cards will be injected here by JS -->
         </div>
       </div>
       
-      <!-- Category Card -->
+      <!-- Categories Section -->
       <div id="category-section" class="card p-6">
-        <h2 class="text-xl font-semibold mb-4 text-center">الباقات</h2>
-        <button id="addCategoryBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">إضافة باقة</button>
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-semibold">الباقات</h2>
+          <button id="addCategoryBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
+            <i class="fas fa-plus"></i> إضافة
+          </button>
+        </div>
         <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           <!-- Category cards will be injected here by JS -->
         </div>
       </div>
     </div>
 
+    <!-- Notification Container -->
+    <div id="notification-container" class="notification text-white bg-green-500 hidden"></div>
+
     <!-- Modals (Dialogs) -->
-    <!-- URL Dialog -->
-    <div id="urls-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
-      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg">
-        <h3 class="text-lg font-semibold mb-4 text-white">تعديل الروابط</h3>
-        <input type="text" id="teleUrlInput" placeholder="رابط تليجرام" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
-        <input type="text" id="feceUrlInput" placeholder="رابط فيسبوك" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
-        <input type="text" id="whatsUrlInput" placeholder="رابط واتساب" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
-        <input type="text" id="playerUrlInput" placeholder="رابط مشغل الفيديو" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-4">
-        <div class="flex justify-end gap-2">
-          <button id="saveUrlsBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">حفظ</button>
-          <button id="cancelUrlsBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
+    <!-- Generic Dialog for all Add/Edit actions -->
+    <div id="generic-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
+        <button id="closeGenericDialogBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 id="dialog-title" class="text-lg font-semibold mb-6 text-white text-center"></h3>
+        <div id="dialog-fields" class="mb-4">
+          <!-- Form fields will be dynamically created here -->
+        </div>
+        <div class="flex justify-center gap-4">
+          <button id="saveGenericBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
+            <span>حفظ</span>
+            <div id="save-spinner" class="spinner hidden"></div>
+          </button>
         </div>
       </div>
     </div>
     
-    <!-- Generic Add/Edit Dialog -->
-    <div id="generic-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
-      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg">
-        <h3 id="dialog-title" class="text-lg font-semibold mb-4 text-white"></h3>
-        <div id="dialog-fields" class="mb-4">
-          <!-- Form fields will be dynamically created here -->
-        </div>
-        <div class="flex justify-end gap-2">
-          <button id="saveGenericBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">حفظ</button>
-          <button id="cancelGenericBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Channels List Dialog -->
     <div id="channels-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
-        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl">
-            <h3 id="channels-dialog-title" class="text-lg font-semibold mb-4 text-white">قنوات الباقة: <span id="pack-name"></span></h3>
-            <div id="channels-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl relative">
+            <button id="closeChannelsDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+              <i class="fas fa-times"></i>
+            </button>
+            <h3 id="channels-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">قنوات الباقة: <span id="pack-name"></span></h3>
+            <button id="addChannelBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
+              <i class="fas fa-plus"></i> إضافة قناة
+            </button>
+            <div id="channels-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
                 <!-- Channels list will be dynamically created here -->
             </div>
-            <div class="flex justify-end gap-2 mt-4">
-                <button id="closeChannelsDialog" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إغلاق</button>
-            </div>
         </div>
+    </div>
+
+    <!-- Servers Dialog -->
+    <div id="servers-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-2xl relative">
+        <button id="closeServersDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 id="servers-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">سيرفرات القناة: <span id="channel-name"></span></h3>
+        <button id="addServerBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
+          <i class="fas fa-plus"></i> إضافة سيرفر
+        </button>
+        <div id="servers-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
+          <!-- Servers list will be dynamically created here -->
+        </div>
+      </div>
     </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // The public API URL for GET requests (no key needed).
       const getApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
-      // The same API URL for POST requests (requires a key).
       const postApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
       const secretKey = 'YOUR_SECRET_KEY';
 
+      // Global state to store fetched data
+      let fullData = {};
+      let currentCategory = null;
+      let currentChannel = null;
+
       // --- Helper Functions ---
-      // Function to fetch all data using a GET request.
       const fetchGetData = async () => {
         try {
           const response = await fetch(getApiUrl, { method: 'GET' });
-          if (!response.ok) {
-            throw new Error('Network response was not ok');
-          }
-          return response.json();
+          if (!response.ok) throw new Error('Network response was not ok');
+          fullData = await response.json();
+          return fullData;
         } catch (error) {
           console.error('Error fetching data:', error);
-          alert('فشل في جلب البيانات. يرجى مراجعة الأكواد أو إذن الوصول.');
-          return { status: 'error', message: 'Network error or invalid response.' };
+          showNotification('فشل في جلب البيانات.', 'bg-red-500');
+          return { status: 'error', message: 'Network error.' };
         }
       };
 
-      // Function to send data using a POST request for CUD operations.
       const fetchPostData = async (action, sheet, data = {}) => {
         const params = new URLSearchParams();
         params.append('key', secretKey);
@@ -166,49 +260,75 @@
           return response.json();
         } catch (error) {
           console.error('Error posting data:', error);
-          return { status: 'error', message: 'Network error or invalid response.' };
+          return { status: 'error', message: 'Network error.' };
         }
       };
 
-      const renderAllData = async () => {
-        const fullData = await fetchGetData();
-        if (fullData.status === 'error') {
-            document.getElementById('competitions-grid').textContent = 'فشل في جلب البيانات.';
-            document.getElementById('category-grid').textContent = 'فشل في جلب البيانات.';
-            return;
-        }
+      const showNotification = (message, color) => {
+        const notif = document.getElementById('notification-container');
+        notif.textContent = message;
+        notif.className = `notification show ${color}`;
+        setTimeout(() => {
+          notif.className = `notification ${color}`;
+        }, 3000);
+      };
 
+      const showSpinner = (btn) => {
+        btn.querySelector('.spinner').classList.remove('hidden');
+        btn.disabled = true;
+      };
+
+      const hideSpinner = (btn) => {
+        btn.querySelector('.spinner').classList.add('hidden');
+        btn.disabled = false;
+      };
+      
+      const openDialog = (dialogId) => {
+        document.getElementById(dialogId).classList.remove('hidden');
+      };
+      const closeDialog = (dialogId) => {
+        document.getElementById(dialogId).classList.add('hidden');
+      };
+
+      const renderAllData = async () => {
+        const data = await fetchGetData();
+        if (data.status === 'error') return;
+        
         // Render Competitions
-        const competitions = fullData.Competitions || [];
+        const competitions = data.Competitions || [];
         const competitionsContainer = document.getElementById('competitions-grid');
         competitionsContainer.innerHTML = '';
         if (competitions.length > 0) {
             competitions.forEach(item => {
-                const card = createCard(item, 'Competitions', 'Competitions', competitionsContainer, fullData);
-                competitionsContainer.appendChild(card);
+                competitionsContainer.appendChild(createCard(item, 'Competitions'));
             });
         } else {
             competitionsContainer.textContent = 'لا توجد بطولات.';
         }
 
-        // Render Categories (Packs)
-        const categories = fullData.category || [];
+        // Render Categories
+        const categories = data.category || [];
         const categoriesContainer = document.getElementById('category-grid');
         categoriesContainer.innerHTML = '';
         if (categories.length > 0) {
             categories.forEach(item => {
-                const card = createCard(item, 'category', 'category', categoriesContainer, fullData);
+                const card = createCard(item, 'category');
                 card.addEventListener('click', () => {
-                    openChannelsDialog(item, fullData);
+                    openChannelsDialog(item);
                 });
                 categoriesContainer.appendChild(card);
             });
         } else {
             categoriesContainer.textContent = 'لا توجد باقات.';
         }
+
+        // Update maintenance switch state
+        const maintenanceState = data['upd-seana'] && data['upd-seana'].length > 0 ? data['upd-seana'][0].seana : 0;
+        document.getElementById('maintenanceSwitch').checked = maintenanceState === 1;
+        document.getElementById('maintenance-icon').style.color = maintenanceState === 1 ? '#6ee7b7' : '#9ca3af';
       };
 
-      const createCard = (item, sheetName, displaySheetName, parentContainer, fullData) => {
+      const createCard = (item, sheetName) => {
           const card = document.createElement('div');
           card.className = 'card p-4 text-center cursor-pointer flex flex-col items-center';
           card.dataset.id = item.id;
@@ -222,93 +342,115 @@
 
           const name = document.createElement('h4');
           name.className = 'text-sm font-semibold text-white truncate w-full';
-          name.textContent = item.name || item.title || 'غير مسمى';
+          name.textContent = item.name || 'غير مسمى';
           card.appendChild(name);
           
+          const actionsContainer = document.createElement('div');
+          actionsContainer.className = 'flex gap-2 mt-2';
+
           const editBtn = document.createElement('button');
-          editBtn.className = 'btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 text-xs rounded-full mt-2';
-          editBtn.textContent = 'تعديل';
+          editBtn.className = 'btn text-gray-400 hover:text-white';
+          editBtn.innerHTML = '<i class="fas fa-edit"></i>';
           editBtn.onclick = (e) => {
               e.stopPropagation();
-              openGenericDialog('update', sheetName, item, () => renderAllData());
+              openGenericDialog('update', sheetName, item);
           };
-          card.appendChild(editBtn);
+          actionsContainer.appendChild(editBtn);
 
           const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 text-xs rounded-full mt-2 mr-2';
-          deleteBtn.textContent = 'حذف';
+          deleteBtn.className = 'btn text-red-500 hover:text-white';
+          deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
           deleteBtn.onclick = (e) => {
               e.stopPropagation();
-              if (confirm(`هل أنت متأكد من حذف ${item.name || item.title}?`)) {
+              if (confirm(`هل أنت متأكد من حذف ${item.name}?`)) {
                   fetchPostData('delete', sheetName, { id: item.id }).then(res => {
                       if (res.status === 'success') {
-                          alert('تم الحذف بنجاح');
+                          showNotification('تم الحذف بنجاح.', 'bg-green-500');
                           renderAllData();
                       } else {
-                          alert('حدث خطأ: ' + res.message);
+                          showNotification('فشل الحذف.', 'bg-red-500');
                       }
                   });
               }
           };
-          card.appendChild(deleteBtn);
+          actionsContainer.appendChild(deleteBtn);
+          
+          card.appendChild(actionsContainer);
           return card;
       };
 
-      const openGenericDialog = (mode, sheet, data = {}, callback) => {
+      const createInputGroup = (id, placeholder, value) => {
+          const group = document.createElement('div');
+          group.className = 'input-group';
+          group.innerHTML = `
+            <input type="text" id="${id}" placeholder=" " value="${value || ''}">
+            <label for="${id}">${placeholder}</label>
+          `;
+          return group;
+      };
+
+      const openGenericDialog = (mode, sheet, data = {}) => {
         const dialog = document.getElementById('generic-dialog');
         const title = document.getElementById('dialog-title');
         const fieldsContainer = document.getElementById('dialog-fields');
         fieldsContainer.innerHTML = '';
-
+        
         title.textContent = mode === 'add' ? `إضافة جديد إلى ${sheet}` : `تعديل ${sheet}`;
         
-        const headers = Object.keys(data).length > 0 ? Object.keys(data) : ['id', 'name', 'img'];
+        let headers = [];
+        if (sheet === 'Competitions') {
+          headers = ['name', 'img', 'url1', 'url2', 'url3'];
+        } else if (sheet === 'category') {
+          headers = ['name', 'img'];
+        } else if (sheet === 'urls') {
+          headers = ['tele', 'fece', 'whats', 'player'];
+        } else if (sheet === 'Channels') {
+          headers = ['name', 'img', 'idp'];
+        } else if (sheet === 'Servers') {
+          headers = ['name', 'type', 'url', 'useragent', 'reffer', 'key', 'keyid'];
+        } else if (sheet === 'upd-seana') {
+          headers = ['v', 'url-update'];
+        }
 
         headers.forEach(header => {
-            if (header === 'id' && mode === 'update') return; // Don't allow editing the ID
-            
-            const label = document.createElement('label');
-            label.textContent = header;
-            label.className = 'text-sm text-gray-300 block mt-2';
-            
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.placeholder = header;
-            input.className = 'dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2';
-            input.id = `input-${header}`;
-            input.value = data[header] || '';
-            
-            fieldsContainer.appendChild(label);
-            fieldsContainer.appendChild(input);
+            if (header === 'id' && mode === 'update') return;
+            const inputGroup = createInputGroup(`input-${header}`, header, data[header]);
+            fieldsContainer.appendChild(inputGroup);
         });
 
-        document.getElementById('saveGenericBtn').onclick = async () => {
+        const saveBtn = document.getElementById('saveGenericBtn');
+        saveBtn.onclick = async () => {
+            showSpinner(saveBtn);
             const newData = {};
-            // Get all input fields and their values
-            const inputs = fieldsContainer.querySelectorAll('input');
-            inputs.forEach(input => {
-                const header = input.id.replace('input-', '');
-                newData[header] = input.value;
+            fieldsContainer.querySelectorAll('input').forEach(input => {
+                newData[input.id.replace('input-', '')] = input.value;
             });
             
-            if (mode === 'update') {
-                newData.id = data.id; // Add the original ID back for updating
-            }
-            
+            if (mode === 'update') newData.id = data.id;
+            if (mode === 'add' && sheet === 'Channels') newData.idp = currentCategory.id;
+            if (mode === 'add' && sheet === 'Servers') newData.idc = currentChannel.id;
+
             const result = await fetchPostData(mode, sheet, newData);
+            hideSpinner(saveBtn);
             if (result.status === 'success') {
-                alert('تم الحفظ بنجاح!');
-                dialog.classList.add('hidden');
-                if (callback) callback();
+                showNotification('تم الحفظ بنجاح.', 'bg-green-500');
+                closeDialog('generic-dialog');
+                if (sheet === 'Channels') {
+                    openChannelsDialog(currentCategory);
+                } else if (sheet === 'Servers') {
+                    openServersDialog(currentChannel);
+                } else {
+                    renderAllData();
+                }
             } else {
-                alert('حدث خطأ: ' + result.message);
+                showNotification(`فشل: ${result.message}`, 'bg-red-500');
             }
         };
-        dialog.classList.remove('hidden');
+        openDialog('generic-dialog');
       };
-
-      const openChannelsDialog = async (category, fullData) => {
-        const dialog = document.getElementById('channels-dialog');
+      
+      const openChannelsDialog = async (category) => {
+        currentCategory = category;
         document.getElementById('pack-name').textContent = category.name;
         const channelsList = document.getElementById('channels-list');
         channelsList.innerHTML = '';
@@ -321,25 +463,36 @@
                 channelCard.className = 'card p-4 flex items-center justify-between';
                 channelCard.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <img src="${channel.img}" class="w-12 h-12 rounded-full">
-                        <span>${channel.name}</span>
+                        <img src="${channel.img}" class="w-12 h-12 rounded-full object-cover">
+                        <span class="font-semibold">${channel.name}</span>
                     </div>
-                    <div>
-                        <button class="btn edit-channel-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 text-xs rounded-full ml-2">تعديل</button>
-                        <button class="btn delete-channel-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 text-xs rounded-full">حذف</button>
+                    <div class="flex gap-2">
+                        <button class="btn text-gray-400 hover:text-white edit-channel-btn">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn text-green-500 hover:text-white add-server-btn">
+                          <i class="fas fa-plus"></i>
+                        </button>
+                        <button class="btn text-red-500 hover:text-white delete-channel-btn">
+                          <i class="fas fa-trash-alt"></i>
+                        </button>
                     </div>
                 `;
                 channelCard.querySelector('.edit-channel-btn').onclick = () => {
-                    openGenericDialog('update', 'Channels', channel, () => renderAllData());
+                    openGenericDialog('update', 'Channels', channel);
+                };
+                channelCard.querySelector('.add-server-btn').onclick = () => {
+                    currentChannel = channel;
+                    openServersDialog(channel);
                 };
                 channelCard.querySelector('.delete-channel-btn').onclick = async () => {
                     if (confirm(`هل أنت متأكد من حذف القناة ${channel.name}?`)) {
                         const res = await fetchPostData('delete', 'Channels', { id: channel.id });
                         if (res.status === 'success') {
-                            alert('تم الحذف بنجاح');
-                            openChannelsDialog(category, fullData);
+                            showNotification('تم الحذف بنجاح.', 'bg-green-500');
+                            openChannelsDialog(category);
                         } else {
-                            alert('حدث خطأ: ' + res.message);
+                            showNotification('فشل الحذف.', 'bg-red-500');
                         }
                     }
                 };
@@ -348,46 +501,89 @@
         } else {
             channelsList.textContent = 'لا توجد قنوات لهذه الباقة.';
         }
-        dialog.classList.remove('hidden');
+        openDialog('channels-dialog');
       };
 
-      // --- Initial Data Loading ---
-      renderAllData();
+      const openServersDialog = (channel) => {
+        currentChannel = channel;
+        document.getElementById('channel-name').textContent = channel.name;
+        const serversList = document.getElementById('servers-list');
+        serversList.innerHTML = '';
+        
+        const servers = fullData.Servers.filter(s => s.idc === channel.id);
+
+        if (servers.length > 0) {
+            servers.forEach(server => {
+                const serverCard = document.createElement('div');
+                serverCard.className = 'card p-4 flex items-center justify-between';
+                serverCard.innerHTML = `
+                  <span>${server.name} (${server.type})</span>
+                  <div class="flex gap-2">
+                    <button class="btn text-gray-400 hover:text-white edit-server-btn">
+                      <i class="fas fa-edit"></i>
+                    </button>
+                    <button class="btn text-red-500 hover:text-white delete-server-btn">
+                      <i class="fas fa-trash-alt"></i>
+                    </button>
+                  </div>
+                `;
+                serverCard.querySelector('.edit-server-btn').onclick = () => {
+                  openGenericDialog('update', 'Servers', server);
+                };
+                serverCard.querySelector('.delete-server-btn').onclick = async () => {
+                  if (confirm(`هل أنت متأكد من حذف السيرفر ${server.name}?`)) {
+                    const res = await fetchPostData('delete', 'Servers', { id: server.id });
+                    if (res.status === 'success') {
+                      showNotification('تم الحذف بنجاح.', 'bg-green-500');
+                      openServersDialog(channel);
+                    } else {
+                      showNotification('فشل الحذف.', 'bg-red-500');
+                    }
+                  }
+                };
+                serversList.appendChild(serverCard);
+            });
+        } else {
+            serversList.textContent = 'لا توجد سيرفرات لهذه القناة.';
+        }
+
+        openDialog('servers-dialog');
+      };
 
       // --- Event Listeners ---
-      document.getElementById('editUrlsBtn').onclick = () => {
-        fetchGetData().then(fullData => {
-            const urls = fullData.urls[0];
-            document.getElementById('teleUrlInput').value = urls.tele || '';
-            document.getElementById('feceUrlInput').value = urls.fece || '';
-            document.getElementById('whatsUrlInput').value = urls.whats || '';
-            document.getElementById('playerUrlInput').value = urls.player || '';
-            document.getElementById('urls-dialog').classList.remove('hidden');
-        });
+      document.getElementById('update-card').onclick = () => {
+        openGenericDialog('update', 'upd-seana', fullData['upd-seana'][0]);
       };
-      
-      document.getElementById('saveUrlsBtn').onclick = async () => {
-        const urlsData = {
-            id: 1, // Assuming the ID of the urls row is 1
-            tele: document.getElementById('teleUrlInput').value,
-            fece: document.getElementById('feceUrlInput').value,
-            whats: document.getElementById('whatsUrlInput').value,
-            player: document.getElementById('playerUrlInput').value
-        };
-        const result = await fetchPostData('update', 'urls', urlsData);
-        if (result.status === 'success') {
-            alert('تم حفظ الروابط بنجاح!');
-            document.getElementById('urls-dialog').classList.add('hidden');
+
+      document.getElementById('links-card').onclick = () => {
+        openGenericDialog('update', 'urls', fullData.urls[0]);
+      };
+
+      document.getElementById('maintenanceSwitch').onchange = async (e) => {
+        const isChecked = e.target.checked;
+        const value = isChecked ? 1 : 0;
+        const data = fullData['upd-seana'][0];
+        const res = await fetchPostData('update', 'upd-seana', { id: data.id, seana: value });
+        if (res.status === 'success') {
+          showNotification('تم تحديث حالة الصيانة.', 'bg-green-500');
+          document.getElementById('maintenance-icon').style.color = isChecked ? '#6ee7b7' : '#9ca3af';
         } else {
-            alert('حدث خطأ: ' + result.message);
+          showNotification('فشل في تحديث حالة الصيانة.', 'bg-red-500');
+          e.target.checked = !isChecked; // Revert switch state on failure
         }
       };
 
-      document.getElementById('cancelUrlsBtn').onclick = () => document.getElementById('urls-dialog').classList.add('hidden');
-      document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions', {}, () => renderAllData());
-      document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category', {}, () => renderAllData());
-      document.getElementById('cancelGenericBtn').onclick = () => document.getElementById('generic-dialog').classList.add('hidden');
-      document.getElementById('closeChannelsDialog').onclick = () => document.getElementById('channels-dialog').classList.add('hidden');
+      document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions', { id: Math.random().toString(36).substr(2, 9) });
+      document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category', { id: Math.random().toString(36).substr(2, 9) });
+      document.getElementById('addChannelBtn').onclick = () => openGenericDialog('add', 'Channels', { id: Math.random().toString(36).substr(2, 9), idp: currentCategory.id });
+      document.getElementById('addServerBtn').onclick = () => openGenericDialog('add', 'Servers', { id: Math.random().toString(36).substr(2, 9), idc: currentChannel.id });
+
+      document.getElementById('closeGenericDialogBtn').onclick = () => closeDialog('generic-dialog');
+      document.getElementById('closeChannelsDialog').onclick = () => closeDialog('channels-dialog');
+      document.getElementById('closeServersDialog').onclick = () => closeDialog('servers-dialog');
+
+      // Initial data load
+      renderAllData();
     });
   </script>
 </body>

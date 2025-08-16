@@ -1,51 +1,350 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <title>أداة تشخيص Firebase</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة التحكم</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+    body {
+      font-family: 'Cairo', sans-serif;
+      background-color: #1a202c;
+      color: #e2e8f0;
+    }
+    .card {
+      background-color: #2d3748;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+    }
+    .btn {
+      transition: background-color 0.2s, transform 0.2s;
+    }
+    .btn:hover {
+      transform: translateY(-2px);
+    }
+    .dialog-overlay {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  </style>
 </head>
-<body>
-    <h1>جارٍ فحص الاتصال بـ Firebase...</h1>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+<body class="p-4 md:p-8">
+  <div class="container mx-auto">
+    <h1 class="text-3xl font-bold mb-8 text-center text-white">لوحة تحكم إدارة المحتوى</h1>
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
 
-        // --- قم بتحديث هذا الجزء بـ firebaseConfig الصحيح لمشروعك ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6ACvhgth3VXhoJJnNOZfIQBpXlTVWcGE",
-            authDomain: "website-f388d.firebaseapp.com",
-            projectId: "website-f388d",
-            storageBucket: "website-f388d.appspot.com",
-            messagingSenderId: "531820596793",
-            appId: "1:531820596793:web:37dbfd0b9a3c7a3a0cc7e8",
-            measurementId: "G-75KT28HL7H"
-        };
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        // --- نهاية الجزء الذي يجب تحديثه ---
+      <!-- Update and Maintenance Card -->
+      <div id="upd-seana-card" class="card p-6 flex flex-col justify-between items-center text-center">
+        <h2 class="text-xl font-semibold mb-4">التحديث والصيانة</h2>
+        <div class="flex items-center gap-4 mb-4">
+          <input type="text" id="updateVersionInput" placeholder="رقم التحديث" class="bg-gray-700 text-white rounded-md p-2 w-24">
+          <button id="updateBtn" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full">تحديث</button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-sm">وضع الصيانة:</span>
+          <label for="maintenanceSwitch" class="relative inline-flex items-center cursor-pointer">
+            <input type="checkbox" id="maintenanceSwitch" class="sr-only peer">
+            <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:right-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+          </label>
+        </div>
+      </div>
 
-        const collectionName = "matches"; // قم بتعديل هذا إذا كان اسم المجموعة مختلفًا
+      <!-- Links Card -->
+      <div id="urls-card" class="card p-6 text-center">
+        <h2 class="text-xl font-semibold mb-4">الروابط</h2>
+        <button id="editUrlsBtn" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full w-full">تعديل الروابط</button>
+      </div>
+    </div>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+      <!-- Competitions Card -->
+      <div id="competitions-section" class="card p-6">
+        <h2 class="text-xl font-semibold mb-4 text-center">البطولات</h2>
+        <button id="addCompetitionBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">إضافة بطولة</button>
+        <div id="competitions-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <!-- Competition cards will be injected here by JS -->
+        </div>
+      </div>
+      
+      <!-- Category Card -->
+      <div id="category-section" class="card p-6">
+        <h2 class="text-xl font-semibold mb-4 text-center">الباقات</h2>
+        <button id="addCategoryBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">إضافة باقة</button>
+        <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <!-- Category cards will be injected here by JS -->
+        </div>
+      </div>
+    </div>
 
-        async function checkConnection() {
-            try {
-                const matchesCollectionRef = collection(db, collectionName);
-                const matchesSnapshot = await getDocs(matchesCollectionRef);
+    <!-- Modals (Dialogs) -->
+    <!-- URL Dialog -->
+    <div id="urls-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg">
+        <h3 class="text-lg font-semibold mb-4 text-white">تعديل الروابط</h3>
+        <input type="text" id="teleUrlInput" placeholder="رابط تليجرام" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
+        <input type="text" id="feceUrlInput" placeholder="رابط فيسبوك" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
+        <input type="text" id="whatsUrlInput" placeholder="رابط واتساب" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2">
+        <input type="text" id="playerUrlInput" placeholder="رابط مشغل الفيديو" class="dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-4">
+        <div class="flex justify-end gap-2">
+          <button id="saveUrlsBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">حفظ</button>
+          <button id="cancelUrlsBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Generic Add/Edit Dialog -->
+    <div id="generic-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg">
+        <h3 id="dialog-title" class="text-lg font-semibold mb-4 text-white"></h3>
+        <div id="dialog-fields" class="mb-4">
+          <!-- Form fields will be dynamically created here -->
+        </div>
+        <div class="flex justify-end gap-2">
+          <button id="saveGenericBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">حفظ</button>
+          <button id="cancelGenericBtn" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
+        </div>
+      </div>
+    </div>
 
-                if (matchesSnapshot.empty) {
-                    console.log(`✅ تم الاتصال بـ Firebase بنجاح، لكن مجموعة "${collectionName}" فارغة.`);
-                } else {
-                    console.log(`✅ تم الاتصال بـ Firebase بنجاح! تم العثور على ${matchesSnapshot.size} مستند في مجموعة "${collectionName}".`);
-                    // يمكنك فحص أول مستند لمعلومات إضافية
-                    matchesSnapshot.docs.forEach((doc) => {
-                         console.log(`- مستند: ${doc.id}`);
-                    });
-                }
-            } catch (error) {
-                console.error("❌ فشل الاتصال بـ Firebase. راجع الإعدادات:", error);
-            }
+    <!-- Channels List Dialog -->
+    <div id="channels-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl">
+            <h3 id="channels-dialog-title" class="text-lg font-semibold mb-4 text-white">قنوات الباقة: <span id="pack-name"></span></h3>
+            <div id="channels-list" class="grid grid-cols-1 md:grid-cols-2 gap-4 max-h-96 overflow-y-auto">
+                <!-- Channels list will be dynamically created here -->
+            </div>
+            <div class="flex justify-end gap-2 mt-4">
+                <button id="closeChannelsDialog" class="btn bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded-full">إغلاق</button>
+            </div>
+        </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const apiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
+      // YOU MUST CHANGE THIS KEY!
+      const secretKey = 'YOUR_SECRET_KEY';
+
+      // --- Helper Functions ---
+      const fetchData = async (action, sheet, data = {}) => {
+        const params = new URLSearchParams();
+        params.append('key', secretKey);
+        params.append('action', action);
+        params.append('sheet', sheet);
+        if (Object.keys(data).length > 0) {
+            params.append('data', JSON.stringify(data));
         }
 
-        checkConnection();
-    </script>
+        try {
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: params
+          });
+          return response.json();
+        } catch (error) {
+          console.error('Error fetching data:', error);
+          return { status: 'error', message: 'Network error or invalid response.' };
+        }
+      };
+
+      const renderData = (sheetName, containerId) => {
+        fetchData('read', sheetName, {}).then(response => {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            if (response.status === 'success' && response.data) {
+                response.data.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-4 text-center cursor-pointer flex flex-col items-center';
+                    card.dataset.id = item.id;
+                    card.dataset.sheet = sheetName;
+                    
+                    if (item.img) {
+                        const img = document.createElement('img');
+                        img.src = item.img;
+                        img.className = 'w-16 h-16 rounded-full mb-2 object-cover';
+                        card.appendChild(img);
+                    }
+
+                    const name = document.createElement('h4');
+                    name.className = 'text-sm font-semibold text-white truncate w-full';
+                    name.textContent = item.name || item.title || item.tele; // Use a fallback for name
+                    card.appendChild(name);
+                    
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 text-xs rounded-full mt-2';
+                    editBtn.textContent = 'تعديل';
+                    editBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        openGenericDialog('edit', sheetName, item);
+                    };
+                    card.appendChild(editBtn);
+
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 text-xs rounded-full mt-2 mr-2';
+                    deleteBtn.textContent = 'حذف';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        if (confirm(`هل أنت متأكد من حذف ${item.name || item.title}?`)) {
+                            fetchData('delete', sheetName, { id: item.id }).then(res => {
+                                if (res.status === 'success') {
+                                    alert('تم الحذف بنجاح');
+                                    renderData(sheetName, containerId);
+                                } else {
+                                    alert('حدث خطأ: ' + res.message);
+                                }
+                            });
+                        }
+                    };
+                    card.appendChild(deleteBtn);
+
+                    // Add click event for opening channel dialog if it's a category card
+                    if (sheetName === 'category') {
+                      card.addEventListener('click', () => {
+                        openChannelsDialog(item);
+                      });
+                    }
+
+                    container.appendChild(card);
+                });
+            } else {
+                container.textContent = 'لم يتم العثور على بيانات.';
+            }
+        });
+      };
+
+      const openGenericDialog = (mode, sheet, data = {}) => {
+        const dialog = document.getElementById('generic-dialog');
+        const title = document.getElementById('dialog-title');
+        const fieldsContainer = document.getElementById('dialog-fields');
+        fieldsContainer.innerHTML = '';
+
+        title.textContent = mode === 'add' ? `إضافة جديد إلى ${sheet}` : `تعديل ${sheet}`;
+        
+        const headers = Object.keys(data).length > 0 ? Object.keys(data) : ['id', 'name', 'img']; // Default headers
+
+        headers.forEach(header => {
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.placeholder = header;
+            input.className = 'dialog-input w-full bg-gray-700 text-white rounded-md p-2 mb-2';
+            input.id = `input-${header}`;
+            input.value = data[header] || '';
+            fieldsContainer.appendChild(input);
+        });
+
+        document.getElementById('saveGenericBtn').onclick = async () => {
+            const newData = {};
+            headers.forEach(header => {
+                newData[header] = document.getElementById(`input-${header}`).value;
+            });
+
+            const result = await fetchData(mode, sheet, newData);
+            if (result.status === 'success') {
+                alert('تم الحفظ بنجاح!');
+                dialog.classList.add('hidden');
+                renderData(sheet, sheet === 'Competitions' ? 'competitions-grid' : 'category-grid');
+            } else {
+                alert('حدث خطأ: ' + result.message);
+            }
+        };
+        dialog.classList.remove('hidden');
+      };
+
+      const openChannelsDialog = async (category) => {
+        const dialog = document.getElementById('channels-dialog');
+        document.getElementById('pack-name').textContent = category.name;
+        const channelsList = document.getElementById('channels-list');
+        channelsList.innerHTML = '';
+
+        const response = await fetchData('read', 'Channels');
+        if (response.status === 'success') {
+            const channels = response.data.filter(c => c.idp === category.id);
+            channels.forEach(channel => {
+                const channelCard = document.createElement('div');
+                channelCard.className = 'card p-4 flex items-center justify-between';
+                channelCard.innerHTML = `
+                    <div class="flex items-center gap-4">
+                        <img src="${channel.img}" class="w-12 h-12 rounded-full">
+                        <span>${channel.name}</span>
+                    </div>
+                    <div>
+                        <button class="btn edit-channel-btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-1 px-2 text-xs rounded-full ml-2">تعديل</button>
+                        <button class="btn delete-channel-btn bg-red-500 hover:bg-red-600 text-white font-bold py-1 px-2 text-xs rounded-full">حذف</button>
+                    </div>
+                `;
+                channelCard.querySelector('.edit-channel-btn').onclick = () => {
+                    openGenericDialog('update', 'Channels', channel);
+                };
+                channelCard.querySelector('.delete-channel-btn').onclick = async () => {
+                    if (confirm(`هل أنت متأكد من حذف القناة ${channel.name}?`)) {
+                        const res = await fetchData('delete', 'Channels', { id: channel.id });
+                        if (res.status === 'success') {
+                            alert('تم الحذف بنجاح');
+                            openChannelsDialog(category); // Re-render the list
+                        } else {
+                            alert('حدث خطأ: ' + res.message);
+                        }
+                    }
+                };
+                channelsList.appendChild(channelCard);
+            });
+        }
+        dialog.classList.remove('hidden');
+      };
+
+      // --- Initial Data Loading ---
+      const initialLoad = () => {
+        renderData('upd-seana', 'upd-seana-card');
+        renderData('Competitions', 'competitions-grid');
+        renderData('category', 'category-grid');
+      };
+
+      // --- Event Listeners ---
+      document.getElementById('editUrlsBtn').onclick = () => {
+        fetchData('read', 'urls', {}).then(response => {
+            if (response.status === 'success' && response.data.length > 0) {
+                const urls = response.data[0];
+                document.getElementById('teleUrlInput').value = urls.tele || '';
+                document.getElementById('feceUrlInput').value = urls.fece || '';
+                document.getElementById('whatsUrlInput').value = urls.whats || '';
+                document.getElementById('playerUrlInput').value = urls.player || '';
+                document.getElementById('urls-dialog').classList.remove('hidden');
+            }
+        });
+      };
+      
+      document.getElementById('saveUrlsBtn').onclick = async () => {
+        const urlsData = {
+            tele: document.getElementById('teleUrlInput').value,
+            fece: document.getElementById('feceUrlInput').value,
+            whats: document.getElementById('whatsUrlInput').value,
+            player: document.getElementById('playerUrlInput').value
+        };
+        // Assuming there's only one row for URLs, we need to find its ID to update.
+        // For simplicity, we'll just send the data for the backend to handle.
+        const result = await fetchData('update', 'urls', { id: 1, ...urlsData }); // Assuming ID is 1
+        if (result.status === 'success') {
+            alert('تم حفظ الروابط بنجاح!');
+            document.getElementById('urls-dialog').classList.add('hidden');
+        } else {
+            alert('حدث خطأ: ' + result.message);
+        }
+      };
+
+      document.getElementById('cancelUrlsBtn').onclick = () => document.getElementById('urls-dialog').classList.add('hidden');
+      document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions');
+      document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category');
+      document.getElementById('cancelGenericBtn').onclick = () => document.getElementById('generic-dialog').classList.add('hidden');
+      document.getElementById('closeChannelsDialog').onclick = () => document.getElementById('channels-dialog').classList.add('hidden');
+      
+      initialLoad();
+    });
+  </script>
 </body>
 </html>

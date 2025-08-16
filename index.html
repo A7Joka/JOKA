@@ -31,6 +31,22 @@
     }
     .dialog-overlay {
       background-color: rgba(0, 0, 0, 0.7);
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 50; /* Base z-index for all dialogs */
+    }
+    /* Specific z-index for higher-level dialogs */
+    #servers-dialog {
+        z-index: 60;
+    }
+    #confirmation-dialog {
+        z-index: 70;
+    }
+    #github-dialog {
+        z-index: 80;
     }
     .notification {
       position: fixed;
@@ -93,9 +109,50 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+    /* Corrected RTL switch styling */
+    #maintenanceSwitch:checked + div::after {
+        transform: translateX(100%);
+    }
+    #maintenanceSwitch + div::after {
+        transition: transform 0.2s ease-in-out;
+        right: 2px;
+    }
+    .floating-btn {
+      position: fixed;
+      bottom: 24px;
+      left: 24px;
+      z-index: 90;
+      background-color: #33a1e0;
+      color: white;
+      border-radius: 9999px;
+      padding: 1rem 1.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    /* Full-page loading overlay */
+    #loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(26, 32, 44, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
   </style>
 </head>
 <body class="p-4 md:p-8">
+
+  <!-- Full-page Loading Overlay -->
+  <div id="loading-overlay">
+    <div class="spinner w-16 h-16"></div>
+  </div>
+
   <div class="container mx-auto">
     <h1 class="text-3xl font-bold mb-8 text-center text-white">لوحة تحكم إدارة المحتوى</h1>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -115,7 +172,7 @@
         <div class="flex items-center">
           <label for="maintenanceSwitch" class="relative inline-flex items-center cursor-pointer">
             <input type="checkbox" id="maintenanceSwitch" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:right-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full"></div>
+            <div class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
           </label>
         </div>
       </div>
@@ -162,13 +219,19 @@
       </div>
     </div>
 
+    <!-- Floating Sync Button -->
+    <button id="sync-btn" class="floating-btn">
+        <i class="fab fa-git-alt text-2xl"></i>
+        <span class="font-semibold">مزامنة البيانات</span>
+    </button>
+    
     <!-- Notification Container -->
     <div id="notification-container" class="notification text-white bg-green-500 hidden"></div>
 
     <!-- Dialogs -->
     
     <!-- Generic Add/Edit Dialog -->
-    <div id="generic-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+    <div id="generic-dialog" class="dialog-overlay hidden">
       <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
         <button id="closeGenericDialogBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
           <i class="fas fa-times"></i>
@@ -186,8 +249,19 @@
       </div>
     </div>
     
+    <!-- Confirmation Dialog -->
+    <div id="confirmation-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-sm relative">
+            <h3 id="confirm-message" class="text-lg font-semibold mb-6 text-white text-center"></h3>
+            <div class="flex justify-center gap-4">
+                <button id="confirm-yes-btn" class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">نعم</button>
+                <button id="confirm-no-btn" class="btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Channels List Dialog -->
-    <div id="channels-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+    <div id="channels-dialog" class="dialog-overlay hidden">
         <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl relative">
             <button id="closeChannelsDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
               <i class="fas fa-times"></i>
@@ -203,7 +277,7 @@
     </div>
 
     <!-- Servers Dialog -->
-    <div id="servers-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
+    <div id="servers-dialog" class="dialog-overlay hidden">
       <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-2xl relative">
         <button id="closeServersDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
           <i class="fas fa-times"></i>
@@ -217,18 +291,53 @@
         </div>
       </div>
     </div>
+
+    <!-- GitHub Sync Dialog -->
+    <div id="github-dialog" class="dialog-overlay hidden">
+      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
+        <button id="closeGitHubDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="text-lg font-semibold mb-6 text-white text-center">مزامنة البيانات مع GitHub</h3>
+        <div class="mb-4">
+          <div class="input-group">
+            <input type="text" id="github-username-input" placeholder=" ">
+            <label for="github-username-input">اسم المستخدم</label>
+          </div>
+          <div class="input-group">
+            <input type="text" id="github-repo-input" placeholder=" ">
+            <label for="github-repo-input">اسم المستودع (Repository)</label>
+          </div>
+          <div class="input-group">
+            <input type="password" id="github-token-input" placeholder=" ">
+            <label for="github-token-input">GitHub Personal Access Token</label>
+          </div>
+        </div>
+        <div class="flex justify-center gap-4">
+          <button id="startSyncBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
+            <span>بدء المزامنة</span>
+            <div id="sync-spinner" class="spinner hidden"></div>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // تعريف روابط API والمفتاح السري
       const getApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
       const postApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
+      const externalDataUrl = 'https://script.google.com/macros/s/AKfycbwPaP2tvO-bfFY-aDEDlfpSQiXXgCfmblzLVjYFopMB9Z3ftQgB3hT7Lx6Lk4IhHie3/exec';
       const secretKey = 'YOUR_SECRET_KEY';
+      const defaultImageUrl = './img/def.jpg';
 
+      // متغيرات لتخزين البيانات الحالية والعناصر المحددة
       let fullData = {};
       let currentCategory = null;
       let currentChannel = null;
 
+      // دالة لجلب جميع البيانات من API
       const fetchGetData = async () => {
         try {
           const response = await fetch(getApiUrl, { method: 'GET' });
@@ -239,14 +348,19 @@
           console.error('Error fetching data:', error);
           showNotification('فشل في جلب البيانات.', 'bg-red-500');
           return { status: 'error', message: 'Network error.' };
+        } finally {
+          document.getElementById('loading-overlay').style.display = 'none';
         }
       };
 
+      // دالة لإرسال البيانات إلى API (حذف، إضافة، تعديل)
       const fetchPostData = async (action, sheet, data = {}) => {
         const params = new URLSearchParams();
         params.append('key', secretKey);
         params.append('action', action);
-        params.append('sheet', sheet);
+        if (sheet) { 
+          params.append('sheet', sheet);
+        }
         if (Object.keys(data).length > 0) {
             params.append('data', JSON.stringify(data));
         }
@@ -263,6 +377,17 @@
         }
       };
 
+      // دالة لإنشاء ID جديد
+      const generateNewId = (sheetName) => {
+          const items = fullData[sheetName] || [];
+          if (items.length === 0) {
+              return 1;
+          }
+          const maxId = Math.max(...items.map(item => parseInt(item.id) || 0));
+          return maxId + 1;
+      };
+
+      // دالة لعرض الإشعارات
       const showNotification = (message, color) => {
         const notif = document.getElementById('notification-container');
         notif.textContent = message;
@@ -272,6 +397,7 @@
         }, 3000);
       };
 
+      // دالة لإظهار وإخفاء مؤشر التحميل
       const showSpinner = (btn) => {
         const spinner = btn.querySelector('.spinner');
         if (spinner) {
@@ -288,9 +414,33 @@
         }
       };
       
+      // دوال لفتح وإغلاق النوافذ المنبثقة
       const openDialog = (dialogId) => document.getElementById(dialogId).classList.remove('hidden');
       const closeDialog = (dialogId) => document.getElementById(dialogId).classList.add('hidden');
+      
+      // دالة لعرض نافذة التأكيد
+      const showConfirmationDialog = (message) => {
+          return new Promise(resolve => {
+              const dialog = document.getElementById('confirmation-dialog');
+              document.getElementById('confirm-message').textContent = message;
+              const yesBtn = document.getElementById('confirm-yes-btn');
+              const noBtn = document.getElementById('confirm-no-btn');
+              
+              const handleConfirm = (isConfirmed) => {
+                  yesBtn.onclick = null;
+                  noBtn.onclick = null;
+                  closeDialog('confirmation-dialog');
+                  resolve(isConfirmed);
+              };
+              
+              yesBtn.onclick = () => handleConfirm(true);
+              noBtn.onclick = () => handleConfirm(false);
 
+              openDialog('confirmation-dialog');
+          });
+      };
+
+      // دالة لعرض جميع البيانات على لوحة التحكم
       const renderAllData = async () => {
         const data = await fetchGetData();
         if (data.status === 'error') return;
@@ -322,19 +472,24 @@
         document.getElementById('maintenance-icon').style.color = maintenanceState === 1 ? '#6ee7b7' : '#9ca3af';
       };
 
+      // دالة لإنشاء بطاقة رئيسية (للبطولات والباقات)
       const createMainCard = (item, sheetName) => {
           const card = document.createElement('div');
-          card.className = 'card p-4 text-center flex flex-col items-center relative';
+          card.className = 'card p-4 text-center flex flex-col items-center relative cursor-pointer';
           
-          if (item.img) {
-              const img = document.createElement('img');
-              img.src = item.img;
-              img.className = 'w-16 h-16 rounded-full mb-2 object-cover cursor-pointer';
-              card.appendChild(img);
-          }
+          // استخدام الصورة الافتراضية إذا لم تكن هناك صورة
+          const imageUrl = item.img || defaultImageUrl;
+          
+          const img = document.createElement('img');
+          img.src = imageUrl;
+          img.className = 'w-16 h-16 mb-2 object-contain';
+          img.onerror = () => {
+              img.src = defaultImageUrl;
+          };
+          card.appendChild(img);
 
           const name = document.createElement('h4');
-          name.className = 'text-sm font-semibold text-white truncate w-full cursor-pointer';
+          name.className = 'text-sm font-semibold text-white truncate w-full';
           name.textContent = item.name || 'غير مسمى';
           card.appendChild(name);
           
@@ -353,17 +508,21 @@
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'btn text-red-500 hover:text-white delete-btn';
           deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-          deleteBtn.onclick = (e) => {
+          deleteBtn.onclick = async (e) => {
               e.stopPropagation();
-              if (confirm(`هل أنت متأكد من حذف ${item.name}?`)) {
-                  fetchPostData('delete', sheetName, { id: item.id }).then(res => {
+              if (sheetName === 'category') {
+                  await handleDeleteCategory(item);
+              } else {
+                  const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف ${item.name}?`);
+                  if (confirmed) {
+                      const res = await fetchPostData('delete', sheetName, { id: item.id });
                       if (res.status === 'success') {
                           showNotification('تم الحذف بنجاح.', 'bg-green-500');
                           renderAllData();
                       } else {
                           showNotification('فشل الحذف.', 'bg-red-500');
                       }
-                  });
+                  }
               }
           };
           actionsContainer.appendChild(deleteBtn);
@@ -381,6 +540,7 @@
           return card;
       };
 
+      // دالة لإنشاء حقول الإدخال
       const createInputGroup = (id, placeholder, value) => {
           const group = document.createElement('div');
           group.className = 'input-group';
@@ -391,6 +551,7 @@
           return group;
       };
 
+      // دالة لفتح نافذة إضافة/تعديل عامة
       const openGenericDialog = (mode, sheet, data = {}) => {
         const dialog = document.getElementById('generic-dialog');
         const title = document.getElementById('dialog-title');
@@ -428,9 +589,12 @@
                 newData[input.id.replace('input-', '')] = input.value;
             });
             
-            if (mode === 'update') {
-              newData.id = data.id || null;
+            if (mode === 'add') {
+                newData.id = generateNewId(sheet);
+            } else {
+                newData.id = data.id || null;
             }
+
             if (mode === 'add' && sheet === 'Channels') newData.idp = currentCategory.id;
             if (mode === 'add' && sheet === 'Servers') newData.idc = currentChannel.id;
 
@@ -438,13 +602,12 @@
             hideSpinner(saveBtn);
             if (result.status === 'success') {
                 showNotification('تم الحفظ بنجاح.', 'bg-green-500');
+                await renderAllData(); // Re-fetch to get new IDs
                 closeDialog('generic-dialog');
                 if (sheet === 'Channels') {
-                    openChannelsDialog(currentCategory);
+                    openChannelsDialog(currentCategory); // Use updated data
                 } else if (sheet === 'Servers') {
-                    openServersDialog(currentChannel);
-                } else {
-                    renderAllData();
+                    openServersDialog(currentChannel); // Use updated data
                 }
             } else {
                 showNotification(`فشل: ${result.message}`, 'bg-red-500');
@@ -453,52 +616,51 @@
         openDialog('generic-dialog');
       };
       
+      // دالة لفتح نافذة القنوات
       const openChannelsDialog = async (category) => {
         currentCategory = category;
         document.getElementById('pack-name').textContent = category.name;
         const channelsList = document.getElementById('channels-list');
         channelsList.innerHTML = '';
-
-        const channels = fullData.Channels.filter(c => c.idp === category.id);
+        
+        // Find the updated category from the fetched data
+        const updatedCategory = fullData.category.find(c => c.id === category.id);
+        const channels = fullData.Channels.filter(c => c.idp === updatedCategory.id);
         
         if (channels.length > 0) {
             channels.forEach(channel => {
                 const channelCard = document.createElement('div');
-                channelCard.className = 'card p-4 flex items-center justify-between';
+                channelCard.className = 'card p-4 flex items-center justify-between cursor-pointer';
+                
+                const channelImgUrl = channel.img || defaultImageUrl;
+                
                 channelCard.innerHTML = `
                     <div class="flex items-center gap-4">
-                        <img src="${channel.img}" class="w-12 h-12 rounded-full object-cover">
+                        <img src="${channelImgUrl}" class="w-12 h-12 object-contain" onerror="this.src='${defaultImageUrl}'">
                         <span class="font-semibold">${channel.name}</span>
                     </div>
                     <div class="flex gap-2">
                         <button class="btn text-gray-400 hover:text-white edit-channel-btn">
                           <i class="fas fa-edit"></i>
                         </button>
-                        <button class="btn text-green-500 hover:text-white add-server-btn">
-                          <i class="fas fa-plus"></i>
-                        </button>
                         <button class="btn text-red-500 hover:text-white delete-channel-btn">
                           <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
                 `;
-                channelCard.querySelector('.edit-channel-btn').onclick = () => {
-                    openGenericDialog('update', 'Channels', channel);
-                };
-                channelCard.querySelector('.add-server-btn').onclick = () => {
-                    currentChannel = channel;
+                
+                channelCard.onclick = () => {
                     openServersDialog(channel);
                 };
-                channelCard.querySelector('.delete-channel-btn').onclick = async () => {
-                    if (confirm(`هل أنت متأكد من حذف القناة ${channel.name}?`)) {
-                        const res = await fetchPostData('delete', 'Channels', { id: channel.id });
-                        if (res.status === 'success') {
-                            showNotification('تم الحذف بنجاح.', 'bg-green-500');
-                            openChannelsDialog(category);
-                        } else {
-                            showNotification('فشل الحذف.', 'bg-red-500');
-                        }
-                    }
+                
+                channelCard.querySelector('.edit-channel-btn').onclick = (e) => {
+                    e.stopPropagation();
+                    openGenericDialog('update', 'Channels', channel);
+                };
+                
+                channelCard.querySelector('.delete-channel-btn').onclick = async (e) => {
+                    e.stopPropagation();
+                    await handleDeleteChannel(channel);
                 };
                 channelsList.appendChild(channelCard);
             });
@@ -507,38 +669,42 @@
         }
         openDialog('channels-dialog');
       };
-
+      
+      // دالة لفتح نافذة السيرفرات
       const openServersDialog = (channel) => {
         currentChannel = channel;
         document.getElementById('channel-name').textContent = channel.name;
         const serversList = document.getElementById('servers-list');
         serversList.innerHTML = '';
         
-        const servers = fullData.Servers.filter(s => s.idc === channel.id);
+        // Check if fullData.Servers exists and is an array
+        const servers = (fullData.Servers || []).filter(s => s.idc === channel.id);
 
         if (servers.length > 0) {
             servers.forEach(server => {
                 const serverCard = document.createElement('div');
-                serverCard.className = 'card p-4 flex items-center justify-between';
+                serverCard.className = 'card p-4 flex items-center justify-between cursor-pointer'; 
                 serverCard.innerHTML = `
                   <span>${server.name} (${server.type})</span>
                   <div class="flex gap-2">
-                    <button class="btn text-gray-400 hover:text-white edit-server-btn">
-                      <i class="fas fa-edit"></i>
-                    </button>
                     <button class="btn text-red-500 hover:text-white delete-server-btn">
                       <i class="fas fa-trash-alt"></i>
                     </button>
                   </div>
                 `;
-                serverCard.querySelector('.edit-server-btn').onclick = () => {
+                
+                serverCard.onclick = () => {
                   openGenericDialog('update', 'Servers', server);
                 };
-                serverCard.querySelector('.delete-server-btn').onclick = async () => {
-                  if (confirm(`هل أنت متأكد من حذف السيرفر ${server.name}?`)) {
+
+                serverCard.querySelector('.delete-server-btn').onclick = async (e) => {
+                  e.stopPropagation();
+                  const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف السيرفر ${server.name}?`);
+                  if (confirmed) {
                     const res = await fetchPostData('delete', 'Servers', { id: server.id });
                     if (res.status === 'success') {
                       showNotification('تم الحذف بنجاح.', 'bg-green-500');
+                      await renderAllData();
                       openServersDialog(channel);
                     } else {
                       showNotification('فشل الحذف.', 'bg-red-500');
@@ -553,6 +719,102 @@
 
         openDialog('servers-dialog');
       };
+      
+      // دوال الحذف المتسلسل
+      const handleDeleteCategory = async (category) => {
+          const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف الباقة ${category.name} وجميع قنواتها وسيرفراتها؟`);
+          if (!confirmed) return;
+
+          const channelsToDelete = fullData.Channels.filter(c => c.idp === category.id);
+          for (const channel of channelsToDelete) {
+              const serversToDelete = (fullData.Servers || []).filter(s => s.idc === channel.id);
+              for (const server of serversToDelete) {
+                  await fetchPostData('delete', 'Servers', { id: server.id });
+              }
+              await fetchPostData('delete', 'Channels', { id: channel.id });
+          }
+
+          const res = await fetchPostData('delete', 'category', { id: category.id });
+          if (res.status === 'success') {
+              showNotification('تم حذف الباقة وكل ما يتعلق بها بنجاح.', 'bg-green-500');
+              renderAllData();
+          } else {
+              showNotification('فشل الحذف.', 'bg-red-500');
+          }
+      };
+
+      const handleDeleteChannel = async (channel) => {
+          const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف القناة ${channel.name} وجميع سيرفراتها؟`);
+          if (!confirmed) return;
+
+          const serversToDelete = (fullData.Servers || []).filter(s => s.idc === channel.id);
+          for (const server of serversToDelete) {
+              await fetchPostData('delete', 'Servers', { id: server.id });
+          }
+
+          const res = await fetchPostData('delete', 'Channels', { id: channel.id });
+          if (res.status === 'success') {
+              showNotification('تم حذف القناة وسيرفراتها بنجاح.', 'bg-green-500');
+              await renderAllData();
+              openChannelsDialog(currentCategory);
+          } else {
+              showNotification('فشل الحذف.', 'bg-red-500');
+          }
+      };
+      
+      // دالة لمزامنة البيانات مع GitHub
+      const syncDataToGitHub = async (username, repo, token) => {
+  const btn = document.getElementById('startSyncBtn');
+  showSpinner(btn);
+
+  // ثوابت
+  const branch = 'main/app/dash/admin';
+  const path = 'data.json';
+  const sourceUrl = 'https://script.google.com/macros/s/AKfycbzCGsz6rDtC1WILFE3gZR3e_IiCsSbMp15NDwk73zq1djcneWDNCBYE1W8UCBWzIGs/exec';
+
+  try {
+    // 1. جلب البيانات من المصدر
+    const dataRes = await fetch(sourceUrl);
+    if (!dataRes.ok) throw new Error('فشل جلب البيانات من المصدر');
+    const jsonData = await dataRes.json();
+    const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(jsonData, null, 2))));
+
+    // 2. جلب sha إذا الملف موجود
+    const shaRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}?ref=${branch}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    let sha = null;
+    if (shaRes.ok) {
+      const shaJson = await shaRes.json();
+      sha = shaJson.sha;
+    }
+
+    // 3. رفع الملف
+    const uploadRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        message: `Sync ${path} at ${new Date().toISOString()}`,
+        content: contentBase64,
+        branch,
+        sha
+      })
+    });
+
+    if (!uploadRes.ok) throw new Error('فشل رفع الملف على GitHub');
+
+    hideSpinner(btn);
+    showNotification('تمت المزامنة بنجاح', 'bg-green-500');
+    closeDialog('github-dialog');
+  } catch (err) {
+    hideSpinner(btn);
+    showNotification(err.message || 'حدث خطأ أثناء المزامنة', 'bg-red-500');
+  }
+};
+
 
       // --- Event Listeners ---
       document.getElementById('update-card').onclick = () => {
@@ -577,16 +839,29 @@
         }
       };
 
-      document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions', { id: Math.random().toString(36).substr(2, 9) });
-      document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category', { id: Math.random().toString(36).substr(2, 9) });
-      document.getElementById('addChannelBtn').onclick = () => openGenericDialog('add', 'Channels', { id: Math.random().toString(36).substr(2, 9), idp: currentCategory.id });
-      document.getElementById('addServerBtn').onclick = () => openGenericDialog('add', 'Servers', { id: Math.random().toString(36).substr(2, 9), idc: currentChannel.id });
+      document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions');
+      document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category');
+      document.getElementById('addChannelBtn').onclick = () => openGenericDialog('add', 'Channels');
+      document.getElementById('addServerBtn').onclick = () => openGenericDialog('add', 'Servers');
 
       document.getElementById('closeGenericDialogBtn').onclick = () => closeDialog('generic-dialog');
       document.getElementById('closeChannelsDialog').onclick = () => closeDialog('channels-dialog');
       document.getElementById('closeServersDialog').onclick = () => closeDialog('servers-dialog');
+      document.getElementById('closeGitHubDialog').onclick = () => closeDialog('github-dialog');
       document.getElementById('matches-card').onclick = () => showNotification('تم الضغط على المباريات، قم بتطبيق الواجهة الخاصة بها.', 'bg-blue-500');
       
+      document.getElementById('sync-btn').onclick = () => openDialog('github-dialog');
+      document.getElementById('startSyncBtn').onclick = () => {
+        const username = document.getElementById('github-username-input').value;
+        const repo = document.getElementById('github-repo-input').value;
+        const token = document.getElementById('github-token-input').value;
+        if (username && repo && token) {
+          syncDataToGitHub(username, repo, token);
+        } else {
+          showNotification('الرجاء إدخال جميع الحقول.', 'bg-red-500');
+        }
+      };
+
       // Initial data load
       renderAllData();
     });

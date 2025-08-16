@@ -165,8 +165,9 @@
     <!-- Notification Container -->
     <div id="notification-container" class="notification text-white bg-green-500 hidden"></div>
 
-    <!-- Modals (Dialogs) -->
-    <!-- Generic Dialog for all Add/Edit actions -->
+    <!-- Dialogs -->
+    
+    <!-- Generic Add/Edit Dialog -->
     <div id="generic-dialog" class="dialog-overlay hidden fixed inset-0 z-50 flex justify-center items-center">
       <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
         <button id="closeGenericDialogBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
@@ -224,12 +225,10 @@
       const postApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
       const secretKey = 'YOUR_SECRET_KEY';
 
-      // Global state to store fetched data
       let fullData = {};
       let currentCategory = null;
       let currentChannel = null;
 
-      // --- Helper Functions ---
       const fetchGetData = async () => {
         try {
           const response = await fetch(getApiUrl, { method: 'GET' });
@@ -274,82 +273,76 @@
       };
 
       const showSpinner = (btn) => {
-        btn.querySelector('.spinner').classList.remove('hidden');
-        btn.disabled = true;
+        const spinner = btn.querySelector('.spinner');
+        if (spinner) {
+          spinner.classList.remove('hidden');
+          btn.disabled = true;
+        }
       };
 
       const hideSpinner = (btn) => {
-        btn.querySelector('.spinner').classList.add('hidden');
-        btn.disabled = false;
+        const spinner = btn.querySelector('.spinner');
+        if (spinner) {
+          spinner.classList.add('hidden');
+          btn.disabled = false;
+        }
       };
       
-      const openDialog = (dialogId) => {
-        document.getElementById(dialogId).classList.remove('hidden');
-      };
-      const closeDialog = (dialogId) => {
-        document.getElementById(dialogId).classList.add('hidden');
-      };
+      const openDialog = (dialogId) => document.getElementById(dialogId).classList.remove('hidden');
+      const closeDialog = (dialogId) => document.getElementById(dialogId).classList.add('hidden');
 
       const renderAllData = async () => {
         const data = await fetchGetData();
         if (data.status === 'error') return;
         
-        // Render Competitions
         const competitions = data.Competitions || [];
         const competitionsContainer = document.getElementById('competitions-grid');
         competitionsContainer.innerHTML = '';
         if (competitions.length > 0) {
             competitions.forEach(item => {
-                competitionsContainer.appendChild(createCard(item, 'Competitions'));
+                competitionsContainer.appendChild(createMainCard(item, 'Competitions'));
             });
         } else {
             competitionsContainer.textContent = 'لا توجد بطولات.';
         }
 
-        // Render Categories
         const categories = data.category || [];
         const categoriesContainer = document.getElementById('category-grid');
         categoriesContainer.innerHTML = '';
         if (categories.length > 0) {
             categories.forEach(item => {
-                const card = createCard(item, 'category');
-                card.addEventListener('click', () => {
-                    openChannelsDialog(item);
-                });
-                categoriesContainer.appendChild(card);
+                categoriesContainer.appendChild(createMainCard(item, 'category'));
             });
         } else {
             categoriesContainer.textContent = 'لا توجد باقات.';
         }
 
-        // Update maintenance switch state
         const maintenanceState = data['upd-seana'] && data['upd-seana'].length > 0 ? data['upd-seana'][0].seana : 0;
         document.getElementById('maintenanceSwitch').checked = maintenanceState === 1;
         document.getElementById('maintenance-icon').style.color = maintenanceState === 1 ? '#6ee7b7' : '#9ca3af';
       };
 
-      const createCard = (item, sheetName) => {
+      const createMainCard = (item, sheetName) => {
           const card = document.createElement('div');
-          card.className = 'card p-4 text-center cursor-pointer flex flex-col items-center';
-          card.dataset.id = item.id;
+          card.className = 'card p-4 text-center flex flex-col items-center relative';
           
           if (item.img) {
               const img = document.createElement('img');
               img.src = item.img;
-              img.className = 'w-16 h-16 rounded-full mb-2 object-cover';
+              img.className = 'w-16 h-16 rounded-full mb-2 object-cover cursor-pointer';
               card.appendChild(img);
           }
 
           const name = document.createElement('h4');
-          name.className = 'text-sm font-semibold text-white truncate w-full';
+          name.className = 'text-sm font-semibold text-white truncate w-full cursor-pointer';
           name.textContent = item.name || 'غير مسمى';
           card.appendChild(name);
           
           const actionsContainer = document.createElement('div');
           actionsContainer.className = 'flex gap-2 mt-2';
-
+          
           const editBtn = document.createElement('button');
-          editBtn.className = 'btn text-gray-400 hover:text-white';
+          editBtn.className = 'btn text-gray-400 hover:text-white edit-btn';
           editBtn.innerHTML = '<i class="fas fa-edit"></i>';
           editBtn.onclick = (e) => {
               e.stopPropagation();
@@ -358,7 +351,7 @@
           actionsContainer.appendChild(editBtn);
 
           const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'btn text-red-500 hover:text-white';
+          deleteBtn.className = 'btn text-red-500 hover:text-white delete-btn';
           deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
           deleteBtn.onclick = (e) => {
               e.stopPropagation();
@@ -376,6 +369,15 @@
           actionsContainer.appendChild(deleteBtn);
           
           card.appendChild(actionsContainer);
+
+          card.onclick = () => {
+            if (sheetName === 'category') {
+                openChannelsDialog(item);
+            } else if (sheetName === 'Competitions') {
+                openGenericDialog('update', 'Competitions', item);
+            }
+          };
+
           return card;
       };
 
@@ -395,7 +397,7 @@
         const fieldsContainer = document.getElementById('dialog-fields');
         fieldsContainer.innerHTML = '';
         
-        title.textContent = mode === 'add' ? `إضافة جديد إلى ${sheet}` : `تعديل ${sheet}`;
+        title.textContent = mode === 'add' ? `إضافة جديد إلى ${sheet}` : `تعديل ${data.name || sheet}`;
         
         let headers = [];
         if (sheet === 'Competitions') {
@@ -405,7 +407,7 @@
         } else if (sheet === 'urls') {
           headers = ['tele', 'fece', 'whats', 'player'];
         } else if (sheet === 'Channels') {
-          headers = ['name', 'img', 'idp'];
+          headers = ['name', 'img'];
         } else if (sheet === 'Servers') {
           headers = ['name', 'type', 'url', 'useragent', 'reffer', 'key', 'keyid'];
         } else if (sheet === 'upd-seana') {
@@ -426,7 +428,9 @@
                 newData[input.id.replace('input-', '')] = input.value;
             });
             
-            if (mode === 'update') newData.id = data.id;
+            if (mode === 'update') {
+              newData.id = data.id || null;
+            }
             if (mode === 'add' && sheet === 'Channels') newData.idp = currentCategory.id;
             if (mode === 'add' && sheet === 'Servers') newData.idc = currentChannel.id;
 
@@ -569,7 +573,7 @@
           document.getElementById('maintenance-icon').style.color = isChecked ? '#6ee7b7' : '#9ca3af';
         } else {
           showNotification('فشل في تحديث حالة الصيانة.', 'bg-red-500');
-          e.target.checked = !isChecked; // Revert switch state on failure
+          e.target.checked = !isChecked;
         }
       };
 
@@ -581,7 +585,8 @@
       document.getElementById('closeGenericDialogBtn').onclick = () => closeDialog('generic-dialog');
       document.getElementById('closeChannelsDialog').onclick = () => closeDialog('channels-dialog');
       document.getElementById('closeServersDialog').onclick = () => closeDialog('servers-dialog');
-
+      document.getElementById('matches-card').onclick = () => showNotification('تم الضغط على المباريات، قم بتطبيق الواجهة الخاصة بها.', 'bg-blue-500');
+      
       // Initial data load
       renderAllData();
     });

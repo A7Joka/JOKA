@@ -1,1 +1,54 @@
-
+{
+  "category": [
+    {
+      "id": 232,
+      "name": "bein",
+      "img": "https://upload.wikimedia.org/wikipedia/commons/5/57/Bein_mediagroup_logo.png"
+    },
+    {
+      "id": 233,
+      "name": "تت"
+    },
+    {
+      "id": 234,
+      "name": "beIN Movies"
+    }
+  ],
+  "Channels": [
+    {
+      "id": 2,
+      "idp": 232,
+      "name": "bein 2",
+      "img": "https://upload.wikimedia.org/wikipedia/commons/5/57/Bein2_logo.png"
+    },
+    {
+      "id": 3,
+      "idp": 233,
+      "name": "ة",
+      "img": "س"
+    }
+  ],
+  "Servers": [
+    {
+      "id": 1,
+      "idc": 3,
+      "name": "س",
+      "type": "ي"
+    }
+  ],
+  "upd-seana": [
+    {
+      "v": 3,
+      "url-update": "exampe.com",
+      "seana": 0
+    }
+  ],
+  "urls": [
+    {
+      "tele": "exampe.com",
+      "fece": "exampe.com",
+      "whats": "exampe.com",
+      "player": "exampe.com"
+    }
+  ]
+}

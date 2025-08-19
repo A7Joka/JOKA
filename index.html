@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,27 +9,33 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+
     body {
       font-family: 'Cairo', sans-serif;
       background-color: #1a202c;
       color: #e2e8f0;
     }
+
     .card {
       background-color: #2d3748;
       border-radius: 12px;
       box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
       transition: transform 0.2s, box-shadow 0.2s;
     }
+
     .card:hover {
       transform: translateY(-5px);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
+
     .btn {
       transition: background-color 0.2s, transform 0.2s;
     }
+
     .btn:hover {
       transform: translateY(-2px);
     }
+
     .dialog-overlay {
       background-color: rgba(0, 0, 0, 0.7);
       position: fixed;
@@ -36,18 +43,27 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      z-index: 50; /* Base z-index for all dialogs */
+      z-index: 50;
+      /* Base z-index for all dialogs */
     }
+
     /* Specific z-index for higher-level dialogs */
     #servers-dialog {
-        z-index: 60;
+      z-index: 60;
     }
+
     #confirmation-dialog {
-        z-index: 70;
+      z-index: 70;
     }
+
+    #generic-dialog {
+      z-index: 80;
+    }
+
     #github-dialog {
-        z-index: 80;
+      z-index: 100;
     }
+
     .notification {
       position: fixed;
       top: 20px;
@@ -61,14 +77,17 @@
       opacity: 0;
       pointer-events: none;
     }
+
     .notification.show {
       opacity: 1;
       pointer-events: auto;
     }
+
     .input-group {
       position: relative;
       margin-bottom: 2rem;
     }
+
     .input-group input {
       background-color: transparent;
       border: 2px solid #4a5568;
@@ -78,10 +97,12 @@
       color: #e2e8f0;
       transition: border-color 0.2s, padding 0.2s;
     }
+
     .input-group input:focus {
       outline: none;
       border-color: #63b3ed;
     }
+
     .input-group label {
       position: absolute;
       top: 0.75rem;
@@ -90,13 +111,15 @@
       transition: all 0.2s ease-out;
       pointer-events: none;
     }
-    .input-group input:focus + label,
-    .input-group input:not(:placeholder-shown) + label {
+
+    .input-group input:focus+label,
+    .input-group input:not(:placeholder-shown)+label {
       top: -1.25rem;
       right: 0;
       font-size: 0.8rem;
       color: #63b3ed;
     }
+
     .spinner {
       border: 4px solid rgba(255, 255, 255, 0.3);
       border-top: 4px solid #fff;
@@ -105,18 +128,27 @@
       height: 24px;
       animation: spin 1s linear infinite;
     }
+
     @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
     }
+
     /* Corrected RTL switch styling */
-    #maintenanceSwitch:checked + div::after {
-        transform: translateX(100%);
+    #maintenanceSwitch:checked+div::after {
+      transform: translateX(100%);
     }
-    #maintenanceSwitch + div::after {
-        transition: transform 0.2s ease-in-out;
-        right: 2px;
+
+    #maintenanceSwitch+div::after {
+      transition: transform 0.2s ease-in-out;
+      right: 2px;
     }
+
     .floating-btn {
       position: fixed;
       bottom: 24px;
@@ -131,6 +163,7 @@
       align-items: center;
       gap: 0.5rem;
     }
+
     /* Full-page loading overlay */
     #loading-overlay {
       position: fixed;
@@ -144,200 +177,428 @@
       align-items: center;
       z-index: 1000;
     }
+
+    .match-card {
+      border-radius: 14px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+      overflow: hidden;
+      margin-bottom: 18px;
+    }
+
+    .cup-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 15px;
+      background-color: #fafafa;
+    }
+
+    .cup-logo {
+      width: 24px;
+      height: 24px;
+    }
+
+    .cup-name {
+      font-weight: 700;
+      font-size: 1rem;
+
+    }
+
+    .match-body {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      border-radius: 12px;
+      overflow: hidden;
+      transition: box-shadow 0.3s;
+    }
+
+    .match-body:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .match-card>.match-body:last-of-type {
+      border-bottom: none;
+    }
+
+    .match-part {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 12px;
+      height: 100%;
+      border-radius: 12px;
+      border: 1px;
+    }
+
+    .part-logo {
+      background-color: #e6e6e6;
+      flex: 0.5;
+    }
+
+    .part-name {
+      flex: 1;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+    }
+
+    .part-center {
+      flex: 0.8;
+      flex-direction: column;
+      background-color: #ccc;
+      color: #fff;
+      text-align: center;
+      font-weight: bold;
+      padding: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .match-logo {
+      width: 42px;
+      height: 42px;
+      object-fit: contain;
+    }
+
+    .match-time,
+    .match-result {
+      font-size: 0.8rem;
+      font-weight: 500;
+      color: white;
+    }
+
+    .match-status {
+      display: inline-block;
+      font-size: 0.75rem;
+      color: white;
+      font-weight: 500;
+      margin-top: 4px;
+    }
+
+    .status-not-started {
+      background-color: #6c757d;
+    }
+
+    .status-live {
+      background-color: #28a745;
+    }
+
+    .status-finished {
+      background-color: #dc3545;
+    }
+
+    .status-postponed {
+      background-color: #ffc107;
+    }
+
+    .match-details-preview {
+      width: 160px;
+
+      border-radius: 10px;
+      padding: 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      justify-content: center;
+      align-items: center;
+      min-height: 58px;
+      border: 1px solid #e8e8e8;
+    }
   </style>
 </head>
+
 <body class="p-4 md:p-8">
-
-  <!-- Full-page Loading Overlay -->
-  <div id="loading-overlay">
-    <div class="spinner w-16 h-16"></div>
+  <div id="login-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-75 z-[100] flex items-center justify-center">
+    <div class="bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-sm">
+      <h2 class="text-xl font-bold mb-6 text-center text-white">تسجيل الدخول</h2>
+      <form id="login-form">
+        <div class="mb-4">
+          <label for="username" class="block text-sm font-medium text-gray-400">اسم المستخدم</label>
+          <input type="text" id="username" name="username"
+            class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div class="mb-6">
+          <label for="password" class="block text-sm font-medium text-gray-400">كلمة المرور</label>
+          <input type="password" id="password" name="password"
+            class="mt-1 block w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <button type="submit"
+          class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">دخول</button>
+      </form>
+      <p id="login-error" class="text-red-400 mt-4 text-sm text-center"></p>
+    </div>
   </div>
-
-  <div class="container mx-auto">
-    <h1 class="text-3xl font-bold mb-8 text-center text-white">لوحة تحكم إدارة المحتوى</h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-      <!-- Update Card -->
-      <div id="update-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
-        <i class="fas fa-sync-alt text-4xl mb-2 text-blue-400"></i>
-        <span class="font-semibold text-lg">تحديث</span>
-      </div>
-
-      <!-- Maintenance Card -->
-      <div id="maintenance-card" class="card p-6 flex flex-col justify-center items-center text-center">
-        <div class="flex flex-col items-center">
-          <i id="maintenance-icon" class="fas fa-tools text-4xl mb-2 text-gray-400"></i>
-          <span class="font-semibold text-lg mb-2">صيانة</span>
-        </div>
-        <div class="flex items-center">
-          <label for="maintenanceSwitch" class="relative inline-flex items-center cursor-pointer">
-            <input type="checkbox" id="maintenanceSwitch" class="sr-only peer">
-            <div class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Links Card -->
-      <div id="links-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
-        <i class="fas fa-link text-4xl mb-2 text-yellow-400"></i>
-        <span class="font-semibold text-lg">الروابط</span>
-      </div>
-    
-      <!-- Matches Card -->
-      <div id="matches-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
-        <i class="fas fa-futbol text-4xl mb-2 text-red-400"></i>
-        <span class="font-semibold text-lg">المباريات</span>
-      </div>
-
+  <div id="dashboard-content" class="min-h-screen p-4" style="display: none;">
+    <!-- Full-page Loading Overlay -->
+    <div id="loading-overlay">
+      <div class="spinner w-16 h-16"></div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-      <!-- Competitions Section -->
-      <div id="competitions-section" class="card p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">البطولات</h2>
-          <button id="addCompetitionBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
-            <i class="fas fa-plus"></i> إضافة
-          </button>
-        </div>
-        <div id="competitions-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          <!-- Competition cards will be injected here by JS -->
-        </div>
-      </div>
-      
-      <!-- Categories Section -->
-      <div id="category-section" class="card p-6">
-        <div class="flex justify-between items-center mb-4">
-          <h2 class="text-xl font-semibold">الباقات</h2>
-          <button id="addCategoryBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
-            <i class="fas fa-plus"></i> إضافة
-          </button>
-        </div>
-        <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          <!-- Category cards will be injected here by JS -->
-        </div>
-      </div>
-    </div>
+    <div class="container mx-auto">
+      <h1 class="text-3xl font-bold mb-8 text-center text-white">لوحة تحكم إدارة المحتوى</h1>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-    <!-- Floating Sync Button -->
-    <button id="sync-btn" class="floating-btn">
+        <!-- Update Card -->
+        <div id="update-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+          <i class="fas fa-sync-alt text-4xl mb-2 text-blue-400"></i>
+          <span class="font-semibold text-lg">تحديث</span>
+        </div>
+
+        <!-- Maintenance Card -->
+        <div id="maintenance-card" class="card p-6 flex flex-col justify-center items-center text-center">
+          <div class="flex flex-col items-center">
+            <i id="maintenance-icon" class="fas fa-tools text-4xl mb-2 text-gray-400"></i>
+            <span class="font-semibold text-lg mb-2">صيانة</span>
+          </div>
+          <div class="flex items-center">
+            <label for="maintenanceSwitch" class="relative inline-flex items-center cursor-pointer">
+              <input type="checkbox" id="maintenanceSwitch" class="sr-only peer">
+              <div
+                class="w-11 h-6 bg-gray-600 rounded-full peer-checked:bg-green-600 after:absolute after:top-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all">
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Links Card -->
+        <div id="links-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+          <i class="fas fa-link text-4xl mb-2 text-yellow-400"></i>
+          <span class="font-semibold text-lg">الروابط</span>
+        </div>
+
+        <!-- Matches Card -->
+        <div id="matches-card" class="card p-6 flex flex-col justify-center items-center text-center cursor-pointer">
+          <i class="fas fa-futbol text-4xl mb-2 text-red-400"></i>
+          <span class="font-semibold text-lg">المباريات</span>
+        </div>
+
+      </div>
+      <div id="matchesView" class="hidden grid grid-cols-1 gap-6 mt-6">
+        <!-- Matches view -->
+        <div id="matches-view" class="card p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">المباريات</h2>
+            <div
+              class="matches-controls flex items-center justify-center gap-4 text-sm text-gray-700 dark:text-gray-100 rtl:flex-row-reverse">
+              <button id="tomorrowBtn"
+                style="border-radius: 6px;width: 30px;height: 30px;font-size: 18px;cursor: pointer;padding: 4px;display: flex;align-items: center;justify-content: center;"
+                class="text-xl px-1 py-1 bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-200 rounded transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="5" height="8.75" viewBox="0 0 5 8.75">
+                  <path
+                    d="M3.491,4.375.183,7.683a.625.625,0,0,0,.884.884l3.75-3.75a.625.625,0,0,0,0-.884L1.067.183a.625.625,0,0,0-.884.884Z"
+                    transform="rotate(180 2.5 4.375)" fill="#9ca39d" />
+                </svg>
+              </button>
+              <button id="displayDate" class="py-1 rounded transition cursor-pointer flex font-medium">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="20" viewBox="0 0 18 20">
+                  <path
+                    d="M2.7,20A2.716,2.716,0,0,1,0,17.273V4.546A2.717,2.717,0,0,1,2.7,1.818H4.5V.909a.9.9,0,1,1,1.8,0v.909h5.4V.909a.9.9,0,1,1,1.8,0v.909h1.8A2.717,2.717,0,0,1,18,4.546V17.273A2.716,2.716,0,0,1,15.3,20Zm-.9-2.727a.905.905,0,0,0,.9.909H15.3a.905.905,0,0,0,.9-.909V9.091H1.8Zm14.4-10V4.546a.906.906,0,0,0-.9-.91H13.5v.91a.9.9,0,1,1-1.8,0v-.91H6.3v.91a.9.9,0,1,1-1.8,0v-.91H2.7a.906.906,0,0,0-.9.91V7.273Z"
+                    fill="#9ca39d"></path>
+                </svg>
+                <span id="formattedDate" class="pr-1"></span>
+              </button>
+              <button id="yesterdayBtn"
+                style="border-radius: 6px;width: 30px;height: 30px;font-size: 18px;cursor: pointer;padding: 4px;display: flex;align-items: center;justify-content: center;"
+                class="text-xl px-1 py-1 bg-gray-200 dark:bg-gray-900 text-gray-900 dark:text-gray-200 rounded transition">
+                <svg xmlns="http://www.w3.org/2000/svg" width="5" height="8.75" viewBox="0 0 5 8.75">
+                  <path
+                    d="M3.491,4.375.183,7.683a.625.625,0,0,0,.884.884l3.75-3.75a.625.625,0,0,0,0-.884L1.067.183a.625.625,0,0,0-.884.884Z"
+                    fill="#9ca39d" />
+                </svg>
+              </button>
+              <button id="todayBtn" class="hidden">اليوم</button>
+              <input type="date" id="datePicker"
+                style="position:absolute; opacity:0; width:1px; height:1px; pointer-events:none;">
+            </div>
+          </div>
+          <div id="matches-loading-spinner" class="flex justify-center py-4">
+            <div class="spinner w-6 h-6 border-4 border-t-blue-600 border-gray-300 rounded-full animate-spin"></div>
+          </div>
+          <div id="matches-container"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <!-- Competitions Section -->
+        <div id="competitions-section" class="card p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">البطولات</h2>
+            <button id="addCompetitionBtn"
+              class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
+              <i class="fas fa-plus"></i> إضافة
+            </button>
+          </div>
+          <div id="competitions-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <!-- Competition cards will be injected here by JS -->
+          </div>
+        </div>
+
+        <!-- Categories Section -->
+        <div id="category-section" class="card p-6">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="text-xl font-semibold">الباقات</h2>
+            <button id="addCategoryBtn"
+              class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full">
+              <i class="fas fa-plus"></i> إضافة
+            </button>
+          </div>
+          <div id="category-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+            <!-- Category cards will be injected here by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Floating Sync Button -->
+      <button id="sync-btn" class="floating-btn">
         <i class="fab fa-git-alt text-2xl"></i>
         <span class="font-semibold">مزامنة البيانات</span>
-    </button>
-    
-    <!-- Notification Container -->
-    <div id="notification-container" class="notification text-white bg-green-500 hidden"></div>
+      </button>
 
-    <!-- Dialogs -->
-    
-    <!-- Generic Add/Edit Dialog -->
-    <div id="generic-dialog" class="dialog-overlay hidden">
-      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
-        <button id="closeGenericDialogBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-          <i class="fas fa-times"></i>
-        </button>
-        <h3 id="dialog-title" class="text-lg font-semibold mb-6 text-white text-center"></h3>
-        <div id="dialog-fields" class="mb-4">
-          <!-- Form fields will be dynamically created here -->
-        </div>
-        <div class="flex justify-center gap-4">
-          <button id="saveGenericBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
-            <span>حفظ</span>
-            <div id="save-spinner" class="spinner hidden"></div>
+      <!-- Notification Container -->
+      <div id="notification-container" class="notification text-white bg-green-500 hidden"></div>
+
+      <!-- Dialogs -->
+
+      <!-- Generic Add/Edit Dialog -->
+      <div id="generic-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
+          <button id="closeGenericDialogBtn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
           </button>
+          <h3 id="dialog-title" class="text-lg font-semibold mb-6 text-white text-center"></h3>
+          <div id="dialog-fields" class="mb-4">
+            <!-- Form fields will be dynamically created here -->
+          </div>
+          <div class="flex justify-center gap-4">
+            <button id="saveGenericBtn"
+              class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
+              <span>حفظ</span>
+              <div id="save-spinner" class="spinner hidden"></div>
+            </button>
+          </div>
         </div>
       </div>
-    </div>
-    
-    <!-- Confirmation Dialog -->
-    <div id="confirmation-dialog" class="dialog-overlay hidden">
+
+      <!-- Confirmation Dialog -->
+      <div id="confirmation-dialog" class="dialog-overlay hidden">
         <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-sm relative">
-            <h3 id="confirm-message" class="text-lg font-semibold mb-6 text-white text-center"></h3>
-            <div class="flex justify-center gap-4">
-                <button id="confirm-yes-btn" class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">نعم</button>
-                <button id="confirm-no-btn" class="btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Channels List Dialog -->
-    <div id="channels-dialog" class="dialog-overlay hidden">
-        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl relative">
-            <button id="closeChannelsDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-              <i class="fas fa-times"></i>
-            </button>
-            <h3 id="channels-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">قنوات الباقة: <span id="pack-name"></span></h3>
-            <button id="addChannelBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
-              <i class="fas fa-plus"></i> إضافة قناة
-            </button>
-            <div id="channels-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
-                <!-- Channels list will be dynamically created here -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Servers Dialog -->
-    <div id="servers-dialog" class="dialog-overlay hidden">
-      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-2xl relative">
-        <button id="closeServersDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-          <i class="fas fa-times"></i>
-        </button>
-        <h3 id="servers-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">سيرفرات القناة: <span id="channel-name"></span></h3>
-        <button id="addServerBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
-          <i class="fas fa-plus"></i> إضافة سيرفر
-        </button>
-        <div id="servers-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
-          <!-- Servers list will be dynamically created here -->
+          <h3 id="confirm-message" class="text-lg font-semibold mb-6 text-white text-center"></h3>
+          <div class="flex justify-center gap-4">
+            <button id="confirm-yes-btn"
+              class="btn bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-full">نعم</button>
+            <button id="confirm-no-btn"
+              class="btn bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full">إلغاء</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- GitHub Sync Dialog -->
-    <div id="github-dialog" class="dialog-overlay hidden">
-      <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
-        <button id="closeGitHubDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
-          <i class="fas fa-times"></i>
-        </button>
-        <h3 class="text-lg font-semibold mb-6 text-white text-center">مزامنة البيانات مع GitHub</h3>
-        <div class="mb-4">
-          <div class="input-group">
-            <input type="text" id="github-username-input" placeholder=" ">
-            <label for="github-username-input">اسم المستخدم</label>
-          </div>
-          <div class="input-group">
-            <input type="text" id="github-repo-input" placeholder=" ">
-            <label for="github-repo-input">اسم المستودع (Repository)</label>
-          </div>
-          <div class="input-group">
-            <input type="password" id="github-token-input" placeholder=" ">
-            <label for="github-token-input">GitHub Personal Access Token</label>
+      <!-- Channels List Dialog -->
+      <div id="channels-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-3xl relative">
+          <button id="closeChannelsDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+          <h3 id="channels-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">قنوات الباقة: <span
+              id="pack-name"></span></h3>
+          <button id="addChannelBtn"
+            class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
+            <i class="fas fa-plus"></i> إضافة قناة
+          </button>
+          <div id="channels-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
+            <!-- Channels list will be dynamically created here -->
           </div>
         </div>
-        <div class="flex justify-center gap-4">
-          <button id="startSyncBtn" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
-            <span>بدء المزامنة</span>
-            <div id="sync-spinner" class="spinner hidden"></div>
+      </div>
+
+      <!-- Servers Dialog -->
+      <div id="servers-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-2xl relative">
+          <button id="closeServersDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
           </button>
+          <h3 id="servers-dialog-title" class="text-lg font-semibold mb-4 text-white text-center">سيرفرات القناة: <span
+              id="channel-name"></span></h3>
+          <button id="addServerBtn"
+            class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full mb-4 w-full">
+            <i class="fas fa-plus"></i> إضافة سيرفر
+          </button>
+          <div id="servers-list" class="flex flex-col gap-4 max-h-96 overflow-y-auto">
+            <!-- Servers list will be dynamically created here -->
+          </div>
+        </div>
+      </div>
+
+      <!-- GitHub Sync Dialog -->
+      <div id="github-dialog" class="dialog-overlay hidden">
+        <div class="dialog-content bg-gray-800 p-8 rounded-lg w-full max-w-lg relative">
+          <button id="closeGitHubDialog" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+            <i class="fas fa-times"></i>
+          </button>
+          <h3 class="text-lg font-semibold mb-6 text-white text-center">مزامنة البيانات مع GitHub</h3>
+          <div class="mb-4">
+            <div class="input-group">
+              <input type="text" id="github-username-input" placeholder=" ">
+              <label for="github-username-input">اسم المستخدم</label>
+            </div>
+            <div class="input-group">
+              <input type="text" id="github-repo-input" placeholder=" ">
+              <label for="github-repo-input">اسم المستودع (Repository)</label>
+            </div>
+            <div class="input-group">
+              <input type="password" id="github-token-input" placeholder=" ">
+              <label for="github-token-input">GitHub Personal Access Token</label>
+            </div>
+          </div>
+          <div class="flex justify-center gap-4">
+            <button id="startSyncBtn"
+              class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-full flex items-center gap-2">
+              <span>بدء المزامنة</span>
+              <div id="sync-spinner" class="spinner hidden"></div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/bcryptjs/dist/bcrypt.min.js"></script>
   <script>
     document.addEventListener('DOMContentLoaded', () => {
-      // تعريف روابط API والمفتاح السري
+      const bcrypt = window.dcodeIO?.bcrypt;
+      const HASHED_PASSWORD = '$2a$12$uQWV94B5AOtQwNt9xWIvmeor5Ewjn0HrdDbQfwF630kB6ff4SW32S';
+      const loginDialog = document.getElementById('login-dialog');
+      const loginForm = document.getElementById('login-form');
+      const loginError = document.getElementById('login-error');
+      const dashboardContent = document.getElementById('dashboard-content');
+      dashboardContent.style.display = 'none';
+      loginForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const username = e.target.username.value;
+        const password = e.target.password.value;
+        if (username !== 'admin') {
+          loginError.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+          return;
+        }
+        bcrypt.compare(password, HASHED_PASSWORD, function (err, result) {
+          if (result) {
+            loginDialog.style.display = 'none';
+            dashboardContent.style.display = 'block';
+          } else {
+            loginError.textContent = 'اسم المستخدم أو كلمة المرور غير صحيحة.';
+          }
+        });
+      });
       const getApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
       const postApiUrl = 'https://script.google.com/macros/s/AKfycbx23fx0fp-ggAFbcLpqr6Y9tlgXe_6vuYd8xXtMEjhErt5LLTEy-BzpC5zEMP4Q5rit/exec';
       const externalDataUrl = 'https://script.google.com/macros/s/AKfycbwPaP2tvO-bfFY-aDEDlfpSQiXXgCfmblzLVjYFopMB9Z3ftQgB3hT7Lx6Lk4IhHie3/exec';
       const secretKey = 'YOUR_SECRET_KEY';
       const defaultImageUrl = './img/def.png';
-
-      // متغيرات لتخزين البيانات الحالية والعناصر المحددة
       let fullData = {};
       let currentCategory = null;
       let currentChannel = null;
-
-      // دالة لجلب جميع البيانات من API
       const fetchGetData = async () => {
         try {
           const response = await fetch(getApiUrl, { method: 'GET' });
@@ -352,19 +613,16 @@
           document.getElementById('loading-overlay').style.display = 'none';
         }
       };
-
-      // دالة لإرسال البيانات إلى API (حذف، إضافة، تعديل)
       const fetchPostData = async (action, sheet, data = {}) => {
         const params = new URLSearchParams();
         params.append('key', secretKey);
         params.append('action', action);
-        if (sheet) { 
+        if (sheet) {
           params.append('sheet', sheet);
         }
         if (Object.keys(data).length > 0) {
-            params.append('data', JSON.stringify(data));
+          params.append('data', JSON.stringify(data));
         }
-
         try {
           const response = await fetch(postApiUrl, {
             method: 'POST',
@@ -376,18 +634,14 @@
           return { status: 'error', message: 'Network error.' };
         }
       };
-
-      // دالة لإنشاء ID جديد
       const generateNewId = (sheetName) => {
-          const items = fullData[sheetName] || [];
-          if (items.length === 0) {
-              return 1;
-          }
-          const maxId = Math.max(...items.map(item => parseInt(item.id) || 0));
-          return maxId + 1;
+        const items = fullData[sheetName] || [];
+        if (items.length === 0) {
+          return 1;
+        }
+        const maxId = Math.max(...items.map(item => parseInt(item.id) || 0));
+        return maxId + 1;
       };
-
-      // دالة لعرض الإشعارات
       const showNotification = (message, color) => {
         const notif = document.getElementById('notification-container');
         notif.textContent = message;
@@ -396,8 +650,6 @@
           notif.className = `notification ${color}`;
         }, 3000);
       };
-
-      // دالة لإظهار وإخفاء مؤشر التحميل
       const showSpinner = (btn) => {
         const spinner = btn.querySelector('.spinner');
         if (spinner) {
@@ -405,7 +657,6 @@
           btn.disabled = true;
         }
       };
-
       const hideSpinner = (btn) => {
         const spinner = btn.querySelector('.spinner');
         if (spinner) {
@@ -413,153 +664,129 @@
           btn.disabled = false;
         }
       };
-      
-      // دوال لفتح وإغلاق النوافذ المنبثقة
       const openDialog = (dialogId) => document.getElementById(dialogId).classList.remove('hidden');
       const closeDialog = (dialogId) => document.getElementById(dialogId).classList.add('hidden');
-      
-      // دالة لعرض نافذة التأكيد
       const showConfirmationDialog = (message) => {
-          return new Promise(resolve => {
-              const dialog = document.getElementById('confirmation-dialog');
-              document.getElementById('confirm-message').textContent = message;
-              const yesBtn = document.getElementById('confirm-yes-btn');
-              const noBtn = document.getElementById('confirm-no-btn');
-              
-              const handleConfirm = (isConfirmed) => {
-                  yesBtn.onclick = null;
-                  noBtn.onclick = null;
-                  closeDialog('confirmation-dialog');
-                  resolve(isConfirmed);
-              };
-              
-              yesBtn.onclick = () => handleConfirm(true);
-              noBtn.onclick = () => handleConfirm(false);
+        return new Promise(resolve => {
+          const dialog = document.getElementById('confirmation-dialog');
+          document.getElementById('confirm-message').textContent = message;
+          const yesBtn = document.getElementById('confirm-yes-btn');
+          const noBtn = document.getElementById('confirm-no-btn');
 
-              openDialog('confirmation-dialog');
-          });
+          const handleConfirm = (isConfirmed) => {
+            yesBtn.onclick = null;
+            noBtn.onclick = null;
+            closeDialog('confirmation-dialog');
+            resolve(isConfirmed);
+          };
+
+          yesBtn.onclick = () => handleConfirm(true);
+          noBtn.onclick = () => handleConfirm(false);
+
+          openDialog('confirmation-dialog');
+        });
       };
-
-      // دالة لعرض جميع البيانات على لوحة التحكم
       const renderAllData = async () => {
         const data = await fetchGetData();
         if (data.status === 'error') return;
-        
+
         const competitions = data.Competitions || [];
         const competitionsContainer = document.getElementById('competitions-grid');
         competitionsContainer.innerHTML = '';
         if (competitions.length > 0) {
-            competitions.forEach(item => {
-                competitionsContainer.appendChild(createMainCard(item, 'Competitions'));
-            });
+          competitions.forEach(item => {
+            competitionsContainer.appendChild(createMainCard(item, 'Competitions'));
+          });
         } else {
-            competitionsContainer.textContent = 'لا توجد بطولات.';
+          competitionsContainer.textContent = 'لا توجد بطولات.';
         }
 
         const categories = data.category || [];
         const categoriesContainer = document.getElementById('category-grid');
         categoriesContainer.innerHTML = '';
         if (categories.length > 0) {
-            categories.forEach(item => {
-                categoriesContainer.appendChild(createMainCard(item, 'category'));
-            });
+          categories.forEach(item => {
+            categoriesContainer.appendChild(createMainCard(item, 'category'));
+          });
         } else {
-            categoriesContainer.textContent = 'لا توجد باقات.';
+          categoriesContainer.textContent = 'لا توجد باقات.';
         }
 
         const maintenanceState = data['upd-seana'] && data['upd-seana'].length > 0 ? data['upd-seana'][0].seana : 0;
         document.getElementById('maintenanceSwitch').checked = maintenanceState === 1;
         document.getElementById('maintenance-icon').style.color = maintenanceState === 1 ? '#6ee7b7' : '#9ca3af';
       };
-
-      // دالة لإنشاء بطاقة رئيسية (للبطولات والباقات)
       const createMainCard = (item, sheetName) => {
-          const card = document.createElement('div');
-          card.className = 'card p-4 text-center flex flex-col items-center relative cursor-pointer';
-          
-          // استخدام الصورة الافتراضية إذا لم تكن هناك صورة
-          const imageUrl = item.img || defaultImageUrl;
-          
-          const img = document.createElement('img');
-          img.src = imageUrl;
-          img.className = 'w-16 h-16 mb-2 object-contain';
-          img.onerror = () => {
-              img.src = defaultImageUrl;
-          };
-          card.appendChild(img);
-
-          const name = document.createElement('h4');
-          name.className = 'text-sm font-semibold text-white truncate w-full';
-          name.textContent = item.name || 'غير مسمى';
-          card.appendChild(name);
-          
-          const actionsContainer = document.createElement('div');
-          actionsContainer.className = 'flex gap-2 mt-2';
-          
-          const editBtn = document.createElement('button');
-          editBtn.className = 'btn text-gray-400 hover:text-white edit-btn';
-          editBtn.innerHTML = '<i class="fas fa-edit"></i>';
-          editBtn.onclick = (e) => {
-              e.stopPropagation();
-              openGenericDialog('update', sheetName, item);
-          };
-          actionsContainer.appendChild(editBtn);
-
-          const deleteBtn = document.createElement('button');
-          deleteBtn.className = 'btn text-red-500 hover:text-white delete-btn';
-          deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
-          deleteBtn.onclick = async (e) => {
-              e.stopPropagation();
-              if (sheetName === 'category') {
-                  await handleDeleteCategory(item);
+        const card = document.createElement('div');
+        card.className = 'card p-4 text-center flex flex-col items-center relative cursor-pointer';
+        const imageUrl = item.img || defaultImageUrl;
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.className = 'w-16 h-16 mb-2 object-contain';
+        img.onerror = () => {
+          img.src = defaultImageUrl;
+        };
+        card.appendChild(img);
+        const name = document.createElement('h4');
+        name.className = 'text-sm font-semibold text-white truncate w-full';
+        name.textContent = item.name || 'غير مسمى';
+        card.appendChild(name);
+        const actionsContainer = document.createElement('div');
+        actionsContainer.className = 'flex gap-2 mt-2';
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn text-gray-400 hover:text-white edit-btn';
+        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+        editBtn.onclick = (e) => {
+          e.stopPropagation();
+          openGenericDialog('update', sheetName, item);
+        };
+        actionsContainer.appendChild(editBtn);
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn text-red-500 hover:text-white delete-btn';
+        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i>';
+        deleteBtn.onclick = async (e) => {
+          e.stopPropagation();
+          if (sheetName === 'category') {
+            await handleDeleteCategory(item);
+          } else {
+            const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف ${item.name}?`);
+            if (confirmed) {
+              const res = await fetchPostData('delete', sheetName, { id: item.id });
+              if (res.status === 'success') {
+                showNotification('تم الحذف بنجاح.', 'bg-green-500');
+                renderAllData();
               } else {
-                  const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف ${item.name}?`);
-                  if (confirmed) {
-                      const res = await fetchPostData('delete', sheetName, { id: item.id });
-                      if (res.status === 'success') {
-                          showNotification('تم الحذف بنجاح.', 'bg-green-500');
-                          renderAllData();
-                      } else {
-                          showNotification('فشل الحذف.', 'bg-red-500');
-                      }
-                  }
+                showNotification('فشل الحذف.', 'bg-red-500');
               }
-          };
-          actionsContainer.appendChild(deleteBtn);
-          
-          card.appendChild(actionsContainer);
-
-          card.onclick = () => {
-            if (sheetName === 'category') {
-                openChannelsDialog(item);
-            } else if (sheetName === 'Competitions') {
-                openGenericDialog('update', 'Competitions', item);
             }
-          };
-
-          return card;
+          }
+        };
+        actionsContainer.appendChild(deleteBtn);
+        card.appendChild(actionsContainer);
+        card.onclick = () => {
+          if (sheetName === 'category') {
+            openChannelsDialog(item);
+          } else if (sheetName === 'Competitions') {
+            openGenericDialog('update', 'Competitions', item);
+          }
+        };
+        return card;
       };
-
-      // دالة لإنشاء حقول الإدخال
       const createInputGroup = (id, placeholder, value) => {
-          const group = document.createElement('div');
-          group.className = 'input-group';
-          group.innerHTML = `
+        const group = document.createElement('div');
+        group.className = 'input-group';
+        group.innerHTML = `
             <input type="text" id="${id}" placeholder=" " value="${value || ''}">
             <label for="${id}">${placeholder}</label>
           `;
-          return group;
+        return group;
       };
-
-      // دالة لفتح نافذة إضافة/تعديل عامة
       const openGenericDialog = (mode, sheet, data = {}) => {
         const dialog = document.getElementById('generic-dialog');
         const title = document.getElementById('dialog-title');
         const fieldsContainer = document.getElementById('dialog-fields');
         fieldsContainer.innerHTML = '';
-        
         title.textContent = mode === 'add' ? `إضافة جديد إلى ${sheet}` : `تعديل ${data.name || sheet}`;
-        
         let headers = [];
         if (sheet === 'Competitions') {
           headers = ['name', 'img', 'url1', 'url2', 'url3'];
@@ -574,67 +801,55 @@
         } else if (sheet === 'upd-seana') {
           headers = ['v', 'url-update'];
         }
-
         headers.forEach(header => {
-            if (header === 'id' && mode === 'update') return;
-            const inputGroup = createInputGroup(`input-${header}`, header, data[header]);
-            fieldsContainer.appendChild(inputGroup);
+          if (header === 'id' && mode === 'update') return;
+          const inputGroup = createInputGroup(`input-${header}`, header, data[header]);
+          fieldsContainer.appendChild(inputGroup);
         });
-
         const saveBtn = document.getElementById('saveGenericBtn');
         saveBtn.onclick = async () => {
-            showSpinner(saveBtn);
-            const newData = {};
-            fieldsContainer.querySelectorAll('input').forEach(input => {
-                newData[input.id.replace('input-', '')] = input.value;
-            });
-            
-            if (mode === 'add') {
-                newData.id = generateNewId(sheet);
-            } else {
-                newData.id = data.id || null;
+          showSpinner(saveBtn);
+          const newData = {};
+          fieldsContainer.querySelectorAll('input').forEach(input => {
+            newData[input.id.replace('input-', '')] = input.value;
+          });
+          if (mode === 'add') {
+            newData.id = generateNewId(sheet);
+          } else {
+            newData.id = data.id || null;
+          }
+          if (mode === 'add' && sheet === 'Channels') newData.idp = currentCategory.id;
+          if (mode === 'add' && sheet === 'Servers') newData.idc = currentChannel.id;
+          const result = await fetchPostData(mode, sheet, newData);
+          hideSpinner(saveBtn);
+          if (result.status === 'success') {
+            showNotification('تم الحفظ بنجاح.', 'bg-green-500');
+            await renderAllData();
+            closeDialog('generic-dialog');
+            if (sheet === 'Channels') {
+              openChannelsDialog(currentCategory);
+            } else if (sheet === 'Servers') {
+              openServersDialog(currentChannel);
             }
-
-            if (mode === 'add' && sheet === 'Channels') newData.idp = currentCategory.id;
-            if (mode === 'add' && sheet === 'Servers') newData.idc = currentChannel.id;
-
-            const result = await fetchPostData(mode, sheet, newData);
-            hideSpinner(saveBtn);
-            if (result.status === 'success') {
-                showNotification('تم الحفظ بنجاح.', 'bg-green-500');
-                await renderAllData(); // Re-fetch to get new IDs
-                closeDialog('generic-dialog');
-                if (sheet === 'Channels') {
-                    openChannelsDialog(currentCategory); // Use updated data
-                } else if (sheet === 'Servers') {
-                    openServersDialog(currentChannel); // Use updated data
-                }
-            } else {
-                showNotification(`فشل: ${result.message}`, 'bg-red-500');
-            }
+          } else {
+            showNotification(`فشل: ${result.message}`, 'bg-red-500');
+          }
         };
         openDialog('generic-dialog');
       };
-      
-      // دالة لفتح نافذة القنوات
       const openChannelsDialog = async (category) => {
         currentCategory = category;
         document.getElementById('pack-name').textContent = category.name;
         const channelsList = document.getElementById('channels-list');
         channelsList.innerHTML = '';
-        
-        // Find the updated category from the fetched data
         const updatedCategory = fullData.category.find(c => c.id === category.id);
         const channels = fullData.Channels.filter(c => c.idp === updatedCategory.id);
-        
         if (channels.length > 0) {
-            channels.forEach(channel => {
-                const channelCard = document.createElement('div');
-                channelCard.className = 'card p-4 flex items-center justify-between cursor-pointer';
-                
-                const channelImgUrl = channel.img || defaultImageUrl;
-                
-                channelCard.innerHTML = `
+          channels.forEach(channel => {
+            const channelCard = document.createElement('div');
+            channelCard.className = 'card p-4 flex items-center justify-between cursor-pointer';
+            const channelImgUrl = channel.img || defaultImageUrl;
+            channelCard.innerHTML = `
                     <div class="flex items-center gap-4">
                         <img src="${channelImgUrl}" class="w-12 h-12 object-contain" onerror="this.src='${defaultImageUrl}'">
                         <span class="font-semibold">${channel.name}</span>
@@ -647,184 +862,151 @@
                           <i class="fas fa-trash-alt"></i>
                         </button>
                     </div>
-                `;
-                
-                channelCard.onclick = () => {
-                    openServersDialog(channel);
-                };
-                
-                channelCard.querySelector('.edit-channel-btn').onclick = (e) => {
-                    e.stopPropagation();
-                    openGenericDialog('update', 'Channels', channel);
-                };
-                
-                channelCard.querySelector('.delete-channel-btn').onclick = async (e) => {
-                    e.stopPropagation();
-                    await handleDeleteChannel(channel);
-                };
-                channelsList.appendChild(channelCard);
-            });
+            `;
+            channelCard.onclick = () => {
+              openServersDialog(channel);
+            };
+            channelCard.querySelector('.edit-channel-btn').onclick = (e) => {
+              e.stopPropagation();
+              openGenericDialog('update', 'Channels', channel);
+            };
+            channelCard.querySelector('.delete-channel-btn').onclick = async (e) => {
+              e.stopPropagation();
+              await handleDeleteChannel(channel);
+            };
+            channelsList.appendChild(channelCard);
+          });
         } else {
-            channelsList.textContent = 'لا توجد قنوات لهذه الباقة.';
+          channelsList.textContent = 'لا توجد قنوات لهذه الباقة.';
         }
         openDialog('channels-dialog');
       };
-      
-      // دالة لفتح نافذة السيرفرات
       const openServersDialog = (channel) => {
         currentChannel = channel;
         document.getElementById('channel-name').textContent = channel.name;
         const serversList = document.getElementById('servers-list');
         serversList.innerHTML = '';
-        
-        // Check if fullData.Servers exists and is an array
         const servers = (fullData.Servers || []).filter(s => s.idc === channel.id);
-
         if (servers.length > 0) {
-            servers.forEach(server => {
-                const serverCard = document.createElement('div');
-                serverCard.className = 'card p-4 flex items-center justify-between cursor-pointer'; 
-                serverCard.innerHTML = `
-                  <span>${server.name} (${server.type})</span>
-                  <div class="flex gap-2">
-                    <button class="btn text-red-500 hover:text-white delete-server-btn">
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  </div>
-                `;
-                
-                serverCard.onclick = () => {
-                  openGenericDialog('update', 'Servers', server);
-                };
-
-                serverCard.querySelector('.delete-server-btn').onclick = async (e) => {
-                  e.stopPropagation();
-                  const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف السيرفر ${server.name}?`);
-                  if (confirmed) {
-                    const res = await fetchPostData('delete', 'Servers', { id: server.id });
-                    if (res.status === 'success') {
-                      showNotification('تم الحذف بنجاح.', 'bg-green-500');
-                      await renderAllData();
-                      openServersDialog(channel);
-                    } else {
-                      showNotification('فشل الحذف.', 'bg-red-500');
-                    }
-                  }
-                };
-                serversList.appendChild(serverCard);
-            });
+          servers.forEach(server => {
+            const serverCard = document.createElement('div');
+            serverCard.className = 'card p-4 flex items-center justify-between cursor-pointer';
+            serverCard.innerHTML = `
+              < span > ${server.name} (${server.type})</span >
+                <div class="flex gap-2">
+                  <button class="btn text-red-500 hover:text-white delete-server-btn">
+                    <i class="fas fa-trash-alt"></i>
+                  </button>
+                </div>
+          `;
+            serverCard.onclick = () => {
+              openGenericDialog('update', 'Servers', server);
+            };
+            serverCard.querySelector('.delete-server-btn').onclick = async (e) => {
+              e.stopPropagation();
+              const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف السيرفر ${server.name}?`);
+              if (confirmed) {
+                const res = await fetchPostData('delete', 'Servers', { id: server.id });
+                if (res.status === 'success') {
+                  showNotification('تم الحذف بنجاح.', 'bg-green-500');
+                  await renderAllData();
+                  openServersDialog(channel);
+                } else {
+                  showNotification('فشل الحذف.', 'bg-red-500');
+                }
+              }
+            };
+            serversList.appendChild(serverCard);
+          });
         } else {
-            serversList.textContent = 'لا توجد سيرفرات لهذه القناة.';
+          serversList.textContent = 'لا توجد سيرفرات لهذه القناة.';
         }
 
         openDialog('servers-dialog');
       };
-      
-      // دوال الحذف المتسلسل
       const handleDeleteCategory = async (category) => {
-          const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف الباقة ${category.name} وجميع قنواتها وسيرفراتها؟`);
-          if (!confirmed) return;
+        const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف الباقة ${category.name} وجميع قنواتها وسيرفراتها؟`);
+        if (!confirmed) return;
 
-          const channelsToDelete = fullData.Channels.filter(c => c.idp === category.id);
-          for (const channel of channelsToDelete) {
-              const serversToDelete = (fullData.Servers || []).filter(s => s.idc === channel.id);
-              for (const server of serversToDelete) {
-                  await fetchPostData('delete', 'Servers', { id: server.id });
-              }
-              await fetchPostData('delete', 'Channels', { id: channel.id });
-          }
-
-          const res = await fetchPostData('delete', 'category', { id: category.id });
-          if (res.status === 'success') {
-              showNotification('تم حذف الباقة وكل ما يتعلق بها بنجاح.', 'bg-green-500');
-              renderAllData();
-          } else {
-              showNotification('فشل الحذف.', 'bg-red-500');
-          }
-      };
-
-      const handleDeleteChannel = async (channel) => {
-          const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف القناة ${channel.name} وجميع سيرفراتها؟`);
-          if (!confirmed) return;
-
+        const channelsToDelete = fullData.Channels.filter(c => c.idp === category.id);
+        for (const channel of channelsToDelete) {
           const serversToDelete = (fullData.Servers || []).filter(s => s.idc === channel.id);
           for (const server of serversToDelete) {
-              await fetchPostData('delete', 'Servers', { id: server.id });
+            await fetchPostData('delete', 'Servers', { id: server.id });
           }
-
-          const res = await fetchPostData('delete', 'Channels', { id: channel.id });
-          if (res.status === 'success') {
-              showNotification('تم حذف القناة وسيرفراتها بنجاح.', 'bg-green-500');
-              await renderAllData();
-              openChannelsDialog(currentCategory);
-          } else {
-              showNotification('فشل الحذف.', 'bg-red-500');
-          }
+          await fetchPostData('delete', 'Channels', { id: channel.id });
+        }
+        const res = await fetchPostData('delete', 'category', { id: category.id });
+        if (res.status === 'success') {
+          showNotification('تم حذف الباقة وكل ما يتعلق بها بنجاح.', 'bg-green-500');
+          renderAllData();
+        } else {
+          showNotification('فشل الحذف.', 'bg-red-500');
+        }
       };
-      
-      // دالة لمزامنة البيانات مع GitHub
+      const handleDeleteChannel = async (channel) => {
+        const confirmed = await showConfirmationDialog(`هل أنت متأكد من حذف القناة ${channel.name} وجميع سيرفراتها؟`);
+        if (!confirmed) return;
+        const serversToDelete = (fullData.Servers || []).filter(s => s.idc === channel.id);
+        for (const server of serversToDelete) {
+          await fetchPostData('delete', 'Servers', { id: server.id });
+        }
+        const res = await fetchPostData('delete', 'Channels', { id: channel.id });
+        if (res.status === 'success') {
+          showNotification('تم حذف القناة وسيرفراتها بنجاح.', 'bg-green-500');
+          await renderAllData();
+          openChannelsDialog(currentCategory);
+        } else {
+          showNotification('فشل الحذف.', 'bg-red-500');
+        }
+      };
       const syncDataToGitHub = async (username, repo, token) => {
-  const btn = document.getElementById('startSyncBtn');
-  showSpinner(btn);
-
-  // ثوابت
-  const branch = 'main';
-  const path = 'data.json';
-  const sourceUrl = 'https://script.google.com/macros/s/AKfycbzCGsz6rDtC1WILFE3gZR3e_IiCsSbMp15NDwk73zq1djcneWDNCBYE1W8UCBWzIGs/exec';
-
-  try {
-    // 1. جلب البيانات من المصدر
-    const dataRes = await fetch(sourceUrl);
-    if (!dataRes.ok) throw new Error('فشل جلب البيانات من المصدر');
-    const jsonData = await dataRes.json();
-    const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(jsonData, null, 2))));
-
-    // 2. جلب sha إذا الملف موجود
-    const shaRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}?ref=${branch}`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    let sha = null;
-    if (shaRes.ok) {
-      const shaJson = await shaRes.json();
-      sha = shaJson.sha;
-    }
-
-    // 3. رفع الملف
-    const uploadRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        message: `Sync ${path} at ${new Date().toISOString()}`,
-        content: contentBase64,
-        branch,
-        sha
-      })
-    });
-
-    if (!uploadRes.ok) throw new Error('فشل رفع الملف على GitHub');
-
-    hideSpinner(btn);
-    showNotification('تمت المزامنة بنجاح', 'bg-green-500');
-    closeDialog('github-dialog');
-  } catch (err) {
-    hideSpinner(btn);
-    showNotification(err.message || 'حدث خطأ أثناء المزامنة', 'bg-red-500');
-  }
-};
-
-
-      // --- Event Listeners ---
+        const btn = document.getElementById('startSyncBtn');
+        showSpinner(btn);
+        const branch = 'main';
+        const path = 'data.json';
+        const sourceUrl = 'https://script.google.com/macros/s/AKfycbzCGsz6rDtC1WILFE3gZR3e_IiCsSbMp15NDwk73zq1djcneWDNCBYE1W8UCBWzIGs/exec';
+        try {
+          const dataRes = await fetch(sourceUrl);
+          if (!dataRes.ok) throw new Error('فشل جلب البيانات من المصدر');
+          const jsonData = await dataRes.json();
+          const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(jsonData, null, 2))));
+          const shaRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}?ref=${branch}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          let sha = null;
+          if (shaRes.ok) {
+            const shaJson = await shaRes.json();
+            sha = shaJson.sha;
+          }
+          const uploadRes = await fetch(`https://api.github.com/repos/${username}/${repo}/contents/${path}`, {
+            method: 'PUT',
+            headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Sync ${path} at ${new Date().toISOString()}`,
+              content: contentBase64,
+              branch,
+              sha
+            })
+          });
+          if (!uploadRes.ok) throw new Error('فشل رفع الملف على GitHub');
+          hideSpinner(btn);
+          showNotification('تمت المزامنة بنجاح', 'bg-green-500');
+          closeDialog('github-dialog');
+        } catch (err) {
+          hideSpinner(btn);
+          showNotification(err.message || 'حدث خطأ أثناء المزامنة', 'bg-red-500');
+        }
+      };
       document.getElementById('update-card').onclick = () => {
         openGenericDialog('update', 'upd-seana', fullData['upd-seana'][0]);
       };
-
       document.getElementById('links-card').onclick = () => {
         openGenericDialog('update', 'urls', fullData.urls[0]);
       };
-
       document.getElementById('maintenanceSwitch').onchange = async (e) => {
         const isChecked = e.target.checked;
         const value = isChecked ? 1 : 0;
@@ -838,18 +1020,21 @@
           e.target.checked = !isChecked;
         }
       };
-
       document.getElementById('addCompetitionBtn').onclick = () => openGenericDialog('add', 'Competitions');
       document.getElementById('addCategoryBtn').onclick = () => openGenericDialog('add', 'category');
       document.getElementById('addChannelBtn').onclick = () => openGenericDialog('add', 'Channels');
       document.getElementById('addServerBtn').onclick = () => openGenericDialog('add', 'Servers');
-
       document.getElementById('closeGenericDialogBtn').onclick = () => closeDialog('generic-dialog');
       document.getElementById('closeChannelsDialog').onclick = () => closeDialog('channels-dialog');
       document.getElementById('closeServersDialog').onclick = () => closeDialog('servers-dialog');
       document.getElementById('closeGitHubDialog').onclick = () => closeDialog('github-dialog');
-      document.getElementById('matches-card').onclick = () => showNotification('تم الضغط على المباريات، قم بتطبيق الواجهة الخاصة بها.', 'bg-blue-500');
-      
+      document.getElementById('matches-card').onclick = () => {
+        if (matchesView.classList.contains('hidden')) {
+          matchesView.classList.remove('hidden');
+        } else {
+          matchesView.classList.add('hidden');
+        }
+      };
       document.getElementById('sync-btn').onclick = () => openDialog('github-dialog');
       document.getElementById('startSyncBtn').onclick = () => {
         const username = document.getElementById('github-username-input').value;
@@ -861,10 +1046,190 @@
           showNotification('الرجاء إدخال جميع الحقول.', 'bg-red-500');
         }
       };
-
-      // Initial data load
       renderAllData();
+      const matchesContainer = document.getElementById('matches-container');
+      const matchesLoadingSpinner = document.getElementById('matches-loading-spinner');
+      const desiredCupsOrder = [
+        // Tier S+
+        "كأس العالم", "تصفيات كأس العالم: أوروبا", "تصفيات كأس العالم: أمريكا الجنوبية", "تصفيات كأس العالم: أفريقيا", "تصفيات آسيا المؤهلة لكأس العالم 2026", "كأس العالم للأندية", "كأس الأمم الإفريقية", "دوري أبطال أوروبا | الأدوار الإقصائية", "دوري أبطال أفريقيا", "دوري أبطال آسيا للنخبة | الأدوار الإقصائية", "كأس العالم تحت 20 سنة", "كأس العالم للناشئين تحت 17 سنة", "درع إتحاد كرة القدم الإنجليزي",
+        // Tier S
+        "دوري أبطال أوروبا", "الدوري الإنجليزي الممتاز", "الدوري الإسباني", "الدوري الإيطالي", "الدوري الألماني", "الدوري الفرنسي", "كأس السوبر الأوروبي", "كأس القارات للأندية", "كأس السوبر الألماني", "الدوري السعودي للمحترفين", "كأس السوبر السعودي", "دوري أبطال آسيا للنخبة", "كأس الكونفيدرالية الإفريقية",
+        // Tier A
+        "الدوري المصري", "كأس خادم الحرمين الشريفين", "كأس مصر", "كأس الرابطة الإنجليزية", "كأس إيطاليا", "كأس ألمانيا", "كأس العرب", "كأس العرب | الأدوار الإقصائية", "دوري الأمم الأوروبية", "بطولة أمم إفريقيا للمحليين", "الرابطة المحترفة الجزائرية الأولى", "الدوري المغربي", "الرابطة التونسية لكرة القدم", "كأس السوبر التونسي", "الدوري القطري", "الدوري الإماراتي للمحترفين", "الدوري العراقي", "كأس العراق", "الدوري السوداني الممتاز", "الدوري الكويتي", "الدوري الأردني للمحترفين", "كأس السوبر الأردني", "دوري المحترفين العماني", "كأس السوبر العماني",
+        // Tier B
+        "الدوري الهولندي الممتاز", "كأس السوبر الهولندي", "الدوري البرتغالي الممتاز", "كأس السوبر البرتغالي", "الدوري البلجيكي", "كأس السوبر البلجيكي", "الدوري التركي الممتاز", "الدوري الإسكتلندي الممتاز", "دوري السوبر السويسري", "دوري السوبر الدنماركي", "الدوري اليوناني", "الدوري الأمريكي لكرة القدم", "الدوري الإيراني", "دوري الدرجة الأولى السعودي", "الدوري المصري - القسم الثاني", "الدوري البحريني الممتاز", "الدوري السوري الممتاز",
+        // Tier C
+        "دوري البطولة الإنجليزية", "دوري أبطال آسيا 2", "دوري أبطال آسيا 2 | الأدوار الإقصائية", "دوري التحدي الآسيوي", "كوبا ليبرتادوريس", "كوبا سودا أمريكانا", "الدوري البرازيلي", "دوري الدرجة الأولى الأرجنتيني", "مباراة ودية - أندية", "مباراة ودية", "كأس الدوريات", "كأس الكونكاكاف أمريكا الوسطى", "تصفيات كأس آسيا"
+      ];
+      let allMatchesData = [];
+      let currentDate = new Date();
+      const datePicker = document.getElementById('datePicker');
+      const formattedDate = document.getElementById('formattedDate');
+      const displayDate = document.getElementById('displayDate');
+      const arabicMonths = [
+        "يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "اغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"
+      ];
+      let selectedDate = new Date();
+      function updateDisplayedDate() {
+        const day = selectedDate.getDate();
+        const month = arabicMonths[selectedDate.getMonth()];
+        const year = selectedDate.getFullYear();
+        formattedDate.textContent = `${day} ${month} ${year}`;
+        datePicker.value = selectedDate.toISOString().split('T')[0];
+      }
+      document.getElementById('yesterdayBtn').addEventListener('click', () => {
+        selectedDate.setDate(selectedDate.getDate() - 1);
+        updateDisplayedDate();
+      });
+      document.getElementById('tomorrowBtn').addEventListener('click', () => {
+        selectedDate.setDate(selectedDate.getDate() + 1);
+        updateDisplayedDate();
+      });
+      displayDate.addEventListener('click', () => {
+        const picker = document.getElementById("datePicker");
+        picker.showPicker();
+      });
+      datePicker.addEventListener('change', () => {
+        if (datePicker.value) {
+          selectedDate = new Date(datePicker.value);
+          updateDisplayedDate();
+        }
+      });
+      updateDisplayedDate();
+      function formatDateToString(date) { return date.toISOString().split('T')[0]; }
+      todayBtn.addEventListener('click', () => { currentDate = new Date(); fetchMatches(formatDateToString(currentDate)); });
+      yesterdayBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() - 1); fetchMatches(formatDateToString(currentDate)); });
+      tomorrowBtn.addEventListener('click', () => { currentDate.setDate(currentDate.getDate() + 1); fetchMatches(formatDateToString(currentDate)); });
+      datePicker.addEventListener('change', () => {
+        const dateParts = datePicker.value.split('-').map(part => parseInt(part, 10));
+        currentDate = new Date(Date.UTC(dateParts[0], dateParts[1] - 1, dateParts[2]));
+        fetchMatches(datePicker.value);
+      });
+      async function fetchMatches(dateString) {
+        matchesLoadingSpinner.style.display = 'flex';
+        matchesContainer.innerHTML = '';
+        datePicker.value = dateString;
+        const apiUrl = `https://ko.best-goal.live/state.php?date=${dateString}`;
+        try {
+          const response = await fetch(apiUrl);
+          if (!response.ok) throw new Error('API Error');
+          const data = await response.json();
+          allMatchesData = [];
+          const leagues = data?.Leagues || [];
+          leagues.forEach(league => {
+            const leagueMatches = league.Matches || [];
+            leagueMatches.forEach(match => {
+              match['Cup-id'] = league['Cup-id'];
+              match['Cup-Name'] = league['Cup-Name'];
+              match['Cup-Logo'] = league['Cup-Logo'];
+              allMatchesData.push(match);
+            });
+          });
+          displayMatches(allMatchesData);
+        } catch (error) {
+          console.error("Fetch Matches Error:", error);
+          matchesContainer.innerHTML = `<p style="text-align:center; color:red;">حدث خطأ في تحميل المباريات.</p>`;
+        } finally {
+          matchesLoadingSpinner.style.display = 'none';
+        }
+      }
+      function displayMatches(matches) {
+        if (!matches || matches.length === 0) {
+          matchesContainer.innerHTML = `<p style="text-align:center;">لا توجد مباريات في هذا اليوم.</p>`;
+          return;
+        }
+        const matchesByCup = matches.reduce((acc, match) => {
+          (acc[match['Cup-id']] = acc[match['Cup-id']] || {
+            cupInfo: match,
+            matches: []
+          }).matches.push(match);
+          return acc;
+        }, {});
+        const matchesByCupArr = Object.values(matchesByCup);
+        const normalizeName = name => name.trim().toLowerCase();
+        const sortedCups = matchesByCupArr.sort((a, b) => {
+          const indexA = desiredCupsOrder.findIndex(n => normalizeName(n) === normalizeName(a.cupInfo['Cup-Name']));
+          const indexB = desiredCupsOrder.findIndex(n => normalizeName(n) === normalizeName(b.cupInfo['Cup-Name']));
+          return (indexA === -1 ? Infinity : indexA) - (indexB === -1 ? Infinity : indexB);
+        });
+        matchesContainer.innerHTML = Object.values(sortedCups).map(cupData => `
+          <div class="match-card bg-gray-200 dark:bg-gray-900 mb-4">
+            <div class="cup-header bg-gray-200 dark:bg-gray-900 rounded-t-xl">
+              <img src="${cupData.cupInfo['Cup-Logo']}" alt="" class="cup-logo">
+                <h2 class="cup-name">${cupData.cupInfo['Cup-Name']}</h2>
+            </div>
+            ${cupData.matches.map(match => {
+          function convertTo24Hour(timeStr) {
+            const [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':').map(Number);
+            if (modifier === 'م' && hours < 12) hours += 12;
+            if (modifier === 'ص' && hours === 12) hours = 0;
+            return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+          }
+          let detailsContent;
+          if (match['Match-Status'] === 'لم تبدأ' || match['Match-Status'] === 'المباراة تأجلت' || match['Match-Status'] === 'المباراة الغيت') {
+            const matchTimeStr = match['Match-Start-Time'];
+            const matchDateStr = match['match_date_time'];
+            let localTimeString = '—';
+            if (matchTimeStr && matchDateStr) {
+              const datePart = matchDateStr.split(' ')[0];
+              const timePart = convertTo24Hour(matchTimeStr);
+              const fullDateTime = `${datePart}T${timePart}:00+02:00`;
+              const localTime = new Date(fullDateTime);
+              localTimeString = localTime.toLocaleTimeString([], {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+              });
+            }
+            detailsContent = `<div class="match-time">${localTimeString}</div>`;
+          } else {
+            detailsContent = `<div class="match-result">${match['Team-Left']['Goal']} - ${match['Team-Right']['Goal']}</div>`;
+          }
+          let statusClass = 'status-not-started';
+          if (match['Match-Status'] === 'إنتهت المباراة') statusClass = 'status-finished';
+          else if (match['Match-Status'] === 'المباراة تأجلت' || match['Match-Status'] === 'المباراة الغيت') statusClass = 'status-postponed';
+          else if (match['Match-Status'] !== 'لم تبدأ') statusClass = 'status-live';
+          return `
+          <div class="match-body bg-gray-200 dark:bg-gray-900 mb-1 mt-1" data-match-id="${match['Match-id']}">
+            <div class="match-part part-logo bg-gray-100 dark:bg-gray-700 rounded-l-xl">
+              <img src="${match['Team-Left']['Logo']}" alt="${match['Team-Left']['Name']}" class="match-logo" />
+            </div>
+            <div class="match-part part-name text-gray-800 dark:text-gray-100">
+              <span class="team-name">${match['Team-Left']['Name']}</span>
+            </div>
+            <div class="match-part part-center ${statusClass}">
+              ${detailsContent}
+              <span class="match-status">${match['Match-Status']}</span>
+            </div>
+            <div class="match-part part-name text-gray-800 dark:text-gray-100">
+              <span class="team-name">${match['Team-Right']['Name']}</span>
+            </div>
+            <div class="match-part part-logo bg-gray-100 dark:bg-gray-700 rounded-r-xl">
+              <img src="${match['Team-Right']['Logo']}" alt="${match['Team-Right']['Name']}" class="match-logo" />
+            </div>
+          </div> `;
+        }).join('')}
+        </div>
+        `).join('');
+        document.querySelectorAll('.match-body').forEach(matchElement => {
+          matchElement.addEventListener('click', () => {
+            const matchId = parseInt(matchElement.getAttribute('data-match-id'), 10);
+            showNotification(`تم تحديد المباراة.المعرّف: ${matchId}`, 'bg-green-500');
+            let myObject = {
+              id: matchId,
+              idp: '0',
+              name: 'مباراة',
+            };
+            openServersDialog(myObject);
+          });
+        });
+      }
+      window.onload = function () {
+        fetchMatches(formatDateToString(new Date()));
+      };
     });
   </script>
 </body>
+
 </html>
